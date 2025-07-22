@@ -104,34 +104,34 @@ export default function RegisterCard() {
                 noValidate
                 sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
             >
-                <FormControl>
-                    <FormLabel htmlFor="email">First Name</FormLabel>
-                    <TextField
-                        error={emailError}
-                        helperText={emailErrorMessage}
-                        name="firstName"
-                        autoComplete="given-name"
-                        autoFocus
-                        required
-                        fullWidth
-                        variant="outlined"
-                        color={emailError ? 'error' : 'primary'}
-                    />
-                </FormControl>
-                <FormControl>
-                    <FormLabel htmlFor="email">Last Name</FormLabel>
-                    <TextField
-                        error={emailError}
-                        helperText={emailErrorMessage}
-                        name="lastName"
-                        autoComplete="family-name"
-                        autoFocus
-                        required
-                        fullWidth
-                        variant="outlined"
-                        color={emailError ? 'error' : 'primary'}
-                    />
-                </FormControl>
+                {/*<FormControl>*/}
+                {/*    <FormLabel htmlFor="email">First Name</FormLabel>*/}
+                {/*    <TextField*/}
+                {/*        error={emailError}*/}
+                {/*        helperText={emailErrorMessage}*/}
+                {/*        name="firstName"*/}
+                {/*        autoComplete="given-name"*/}
+                {/*        autoFocus*/}
+                {/*        required*/}
+                {/*        fullWidth*/}
+                {/*        variant="outlined"*/}
+                {/*        color={emailError ? 'error' : 'primary'}*/}
+                {/*    />*/}
+                {/*</FormControl>*/}
+                {/*<FormControl>*/}
+                {/*    <FormLabel htmlFor="email">Last Name</FormLabel>*/}
+                {/*    <TextField*/}
+                {/*        error={emailError}*/}
+                {/*        helperText={emailErrorMessage}*/}
+                {/*        name="lastName"*/}
+                {/*        autoComplete="family-name"*/}
+                {/*        autoFocus*/}
+                {/*        required*/}
+                {/*        fullWidth*/}
+                {/*        variant="outlined"*/}
+                {/*        color={emailError ? 'error' : 'primary'}*/}
+                {/*    />*/}
+                {/*</FormControl>*/}
                 <FormControl>
                     <FormLabel htmlFor="email">Email</FormLabel>
                     <TextField
@@ -201,19 +201,19 @@ export default function RegisterCard() {
                 <Button
                     fullWidth
                     variant="outlined"
-                    onClick={() => alert('Sign in with Google')}
+                    onClick={() => window.open(process.env.NEXT_PUBLIC_API_BASE + '/api/auth/google', '_self')}
                     startIcon={<GoogleIcon />}
                 >
                     Sign in with Google
                 </Button>
-                <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => alert('Sign in with Facebook')}
-                    startIcon={<FacebookIcon />}
-                >
-                    Sign in with Facebook
-                </Button>
+                {/*<Button*/}
+                {/*    fullWidth*/}
+                {/*    variant="outlined"*/}
+                {/*    onClick={() => alert('Sign in with Facebook')}*/}
+                {/*    startIcon={<FacebookIcon />}*/}
+                {/*>*/}
+                {/*    Sign in with Facebook*/}
+                {/*</Button>*/}
             </Box>
         </Card>
     );

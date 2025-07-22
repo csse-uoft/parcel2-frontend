@@ -189,7 +189,7 @@ export default function SignInCard() {
                     Don't have an account?{' '}
                     <span>
             <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/register/"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
             >
@@ -203,19 +203,19 @@ export default function SignInCard() {
                 <Button
                     fullWidth
                     variant="outlined"
-                    onClick={() => alert('Sign in with Google')}
+                    onClick={() => window.open(process.env.NEXT_PUBLIC_API_BASE + '/api/auth/google', '_self')}
                     startIcon={<GoogleIcon />}
                 >
                     Sign in with Google
                 </Button>
-                <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => alert('Sign in with Facebook')}
-                    startIcon={<FacebookIcon />}
-                >
-                    Sign in with Facebook
-                </Button>
+                {/*<Button*/}
+                {/*    fullWidth*/}
+                {/*    variant="outlined"*/}
+                {/*    onClick={() => alert('Sign in with Facebook')}*/}
+                {/*    startIcon={<FacebookIcon />}*/}
+                {/*>*/}
+                {/*    Sign in with Facebook*/}
+                {/*</Button>*/}
             </Box>
         </Card>
     );

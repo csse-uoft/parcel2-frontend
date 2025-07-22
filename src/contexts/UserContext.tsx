@@ -10,7 +10,7 @@ import React, {
 import { useSnackbar } from 'notistack';
 import { useUser } from "@/lib/hooks/useUser";
 import { useLogout } from "@/lib/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 /* ---------- Types ----------------------------------------------------- */
 
@@ -21,7 +21,8 @@ export interface EnqueueOptions {
 }
 
 export interface UserContextValue {
-    username: string;
+    isRegistrationComplete: boolean;
+    username?: string;
     firstName: string;
     lastName: string;
     roles: string[];
@@ -45,6 +46,7 @@ export interface UserContextValue {
 /* ---------- Initial (default) state ---------------------------------- */
 
 const defaultState: UserContextValue = {
+    isRegistrationComplete: false,
     username: 'guest',
     firstName: '',
     lastName: '',
@@ -58,7 +60,7 @@ const defaultState: UserContextValue = {
     updateUser: () => undefined,
     updateVersion: () => undefined,
     enqueueMessage: () => undefined,
-    logout: async () => undefined,
+    logout: async () => undefined
 };
 
 /* ---------- Action & reducer ----------------------------------------- */
@@ -75,7 +77,12 @@ const reducer = (state: UserContextValue, action: Action): UserContextValue => {
             return { ...state, ...action.payload };
 
         case 'UPDATE_USER':
-            return { ...state, ...action.payload };
+            const newState = { ...state, ...action.payload };
+            if (action.payload.username == null) {
+                // e.g. oauth users who don't have a username
+                newState.username = undefined;
+            }
+            return newState;
 
         case 'UPDATE_VERSION':
             return { ...state, version: action.payload };
@@ -95,6 +102,7 @@ const STORAGE_KEY = 'userContext';
 const loadFromStorage = (): Partial<UserContextValue> => {
     try {
         const json = localStorage.getItem(STORAGE_KEY);
+        console.log(`Loading user context from localStorage: ${json}`);
         if (!json) return {};
         return JSON.parse(json) as Partial<UserContextValue>;
     } catch {
@@ -126,6 +134,7 @@ export const UserProvider = ({ children }: ProviderProps) => {
     const { user, mutate, isLoading } = useUser();
     const { trigger: userLogout } = useLogout();
     const router = useRouter();
+    const pathname = usePathname();
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [state, dispatch] = useReducer(reducer, defaultState);
@@ -142,8 +151,8 @@ export const UserProvider = ({ children }: ProviderProps) => {
             timerRef.current = setTimeout(() => logout(), ms);
         }
     };
-
     useEffect(() => {
+        console.log(`UserContext: user changed to ${user?.email} (exp: ${user?.exp})`);
         if (user && !isLoading && user.username !== 'guest') {
             dispatch({ type: 'UPDATE_USER', payload: user });
             scheduleExpiry(user.exp);
@@ -151,7 +160,17 @@ export const UserProvider = ({ children }: ProviderProps) => {
             dispatch({ type: 'UPDATE_USER', payload: defaultState });
             if (timerRef.current) clearTimeout(timerRef.current);
         }
+
     }, [user?.username, user?.exp]);
+
+    // if the user is not registered, redirect to the registration page
+    useEffect(() => {
+        if (user && user.username !== 'guest' && !user.isRegistrationComplete && pathname !== '/register/setup') {
+            // if the user is not registered, redirect to the registration page
+            router.push('/register/setup');
+        }
+    }, [pathname]);
+
 
     const logout = async () => {
         await userLogout();

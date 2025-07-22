@@ -118,7 +118,12 @@ export const navConfig: NavConfig = [
         children: [
             {
                 label: 'My Profile',
-                href: '/console/profile',
+                href: '/console/profile/account',
+                icon: AccountCircleOutlined,
+            },
+            {
+                label: 'My Organization',
+                href: '/console/profile/organization',
                 icon: AccountCircleOutlined,
             },
             {
