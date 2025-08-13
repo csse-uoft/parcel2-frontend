@@ -15,8 +15,9 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { ControlledTextInput } from "@/components/forms/inputs/WrappedInputs";
 import ControlledStringArrayField from "@/components/forms/inputs/ControlledStringArrayField";
-import { MAX_LEGAL_NAMES, OrganizationSchema } from "@/components/forms/schema/Organization";
+import { MAX_LEGAL_NAMES, MAX_REGISTRATION_NUMBERS, OrganizationSchema } from "@/components/forms/schema/Organization";
 import ContactForm from "@/components/forms/ContactForm";
+import ControlledLegalField from "@/components/forms/inputs/ControlledLegalField";
 
 export type OrganizationFormData = z.infer<typeof OrganizationSchema>;
 
@@ -33,7 +34,8 @@ export const organizationInitialValues = {
     name: '',
     briefDescription: '',
     description: '',
-    legalNames: [{ value: '' }],
+    legalNames: [],
+    registrationNumbers: [],
     acronym: [],
     primaryAddress: {
         provinceName: '',
@@ -97,11 +99,6 @@ export default function OrganizationForm({ id, defaultValues, onSubmit, disabled
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <ControlledTextInput<OrganizationFormData> control={control} name="businessRegistrationNumber"
-                                                                   label="Business Registration Number"/>
-                    </Grid>
-
-                    <Grid size={{ xs: 12 }}>
                         <ControlledTextInput<OrganizationFormData> control={control} name="missionStatement"
                                                                    label="Mission Statement" multiline minRows={2}/>
                     </Grid>
@@ -112,8 +109,13 @@ export default function OrganizationForm({ id, defaultValues, onSubmit, disabled
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <ControlledStringArrayField name="legalNames" label="Legal Names" max={MAX_LEGAL_NAMES}/>
+                        <ControlledLegalField name="legalNames" label="Legal Names" />
                     </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                        <ControlledLegalField name="registrationNumbers" label="Registration Numbers" max={MAX_REGISTRATION_NUMBERS} />
+                    </Grid>
+
 
                     <Grid size={{ xs: 12 }}>
                         <ControlledStringArrayField name="acronyms" label="Acronyms"/>

@@ -39,7 +39,7 @@ export default function MyOrganizationPage() {
             primaryAddress: data.primaryAddress ?? organizationInitialValues.primaryAddress,
             mailingAddress: data.mailingAddress ?? {},
             deliveryAddress: data.deliveryAddress ?? {},
-            legalNames: (data.legalNames || []).map((name: string) => ({ value: name })),
+            // legalNames: (data.legalNames || []).map((name: string) => ({ value: name })),
             acronyms: (data.acronyms || []).map((a: string) => ({ value: a })),
         };
     }, [data]);
@@ -57,7 +57,7 @@ export default function MyOrganizationPage() {
                     body: JSON.stringify({
                         organization: {
                             ...formData,
-                            legalNames: formData.legalNames.map((name) => name.value),
+                            // legalNames: formData.legalNames.map((name) => name.value),
                             acronyms: formData.acronyms?.map((a) => a.value),
                         }
                     }),
