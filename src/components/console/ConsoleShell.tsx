@@ -7,15 +7,12 @@ import {
     AppBar,
     Toolbar,
     List,
-    Divider,
     Collapse,
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Typography,
     IconButton,
     Button,
-    CssBaseline,
     useMediaQuery,
 } from '@mui/material';
 import {
@@ -24,7 +21,7 @@ import {
     ExpandLess,
     ExpandMore,
 } from '@mui/icons-material';
-import { styled, useColorScheme, useTheme } from '@mui/material/styles';
+import { styled, useColorScheme, useTheme, alpha, Theme } from '@mui/material/styles';
 import { useRouter, usePathname } from 'next/navigation';
 
 import { navConfig } from './navConfig';
@@ -34,20 +31,18 @@ import { Loading } from '@/components/Loading';
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
 
 const DRAWER_WIDTH = 240;
-const DrawerHeader = styled('div')(({ theme }) => ({
-    ...theme.mixins.toolbar,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingLeft: theme.spacing(1),
-}));
+
+const ITEM_H = 44;
+const ICON_W = 22;
+
 
 const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const router = useRouter();
     const pathname = usePathname();
     const theme = useTheme();
     const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
-    const { mode } = useColorScheme();
+    const { mode, systemMode } = useColorScheme();
+    const isDark = mode === 'dark' || (mode === 'system' && systemMode === 'dark');
 
     const { open, toggle, setOpen, permanent } = useDrawer();
     const { logout } = useUserContext();
@@ -79,52 +74,73 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         key={label}
                         onClick={() => toggleParent(label)}
                         sx={{
-                            height: 42,
+                            mb: 0.5,
+                            px: 2,
+                            height: ITEM_H,
                             fontSize: 15,
                             fontWeight: 500,
-                            ...(mode === 'light' ? {
-                                bgcolor: 'rgb(234,234,234)',
-                                '&:hover': { bgcolor: 'rgb(234,234,234)' },
-                            } : {}),
+                            borderRadius: 1.5,
+                            '& .MuiListItemIcon-root': {
+                                minWidth: 32,
+                                '& svg': { fontSize: ICON_W },
+                            },
+                            bgcolor: expanded.includes(label)
+                                ? alpha(theme.palette.text.primary, isDark ? 0.08 : 0.04)
+                                : 'transparent',
+                            '&:hover': {
+                                bgcolor: alpha(theme.palette.text.primary, isDark ? 0.12 : 0.06),
+                            },
                         }}
                     >
                         {Icon && (
-                            <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                                <Icon />
+                            <ListItemIcon>
+                                <Icon/>
                             </ListItemIcon>
                         )}
-                        <ListItemText primary={label} />
-                        {parentOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>,
+                        <ListItemText
+                            primary={label}
+                            primaryTypographyProps={{ noWrap: true }}
+                        />
+                        {parentOpen ? <ExpandLess/> : <ExpandMore/>}
+                    </ListItemButton>
                 );
             }
 
             if (children) {
                 items.push(
-                    <Collapse
-                        in={parentOpen}
-                        timeout="auto"
-                        unmountOnExit
-                        key={`${label}-collapse`}
-                    >
+                    <Collapse in={open && parentOpen} timeout="auto" unmountOnExit key={`${label}-collapse`}>
                         <List disablePadding>
                             {children.map(({ icon: ChildIcon, label: cLabel, href }) => (
                                 <ListItemButton
                                     key={cLabel}
                                     selected={href === pathname}
                                     sx={{
-                                        pl: 3,
-                                        height: 42,
-                                        fontSize: 15,
-                                        ...(mode === 'light' ? {
-                                            color: '#496169',
-                                            '&.Mui-selected': {
-                                                bgcolor: 'rgb(220,226,241)',
-                                                color: '#5850ec',
-                                                fontWeight: 600,
+                                        mx: 1,                          // pill side insets
+                                        my: 0.25,
+                                        pl: 2.5,                        // indent under the group row
+                                        pr: 1.25,
+                                        height: ITEM_H,
+                                        borderRadius: 1.5,
+                                        color: isDark ? 'rgb(210,210,210)' : theme.palette.text.primary,
+                                        '& .MuiListItemIcon-root': {
+                                            minWidth: 32,
+                                            '& svg': { fontSize: ICON_W },
+                                        },
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.text.primary, isDark ? 0.12 : 0.06),
+                                            '& .MuiListItemIcon-root': { color: isDark ? 'rgb(215,215,215)' : theme.palette.text.primary},
+                                        },
+                                        '&.Mui-selected': {
+                                            bgcolor: alpha(theme.palette.primary.main, isDark ? 0.24 : 0.12),
+                                            color: isDark ? 'rgb(230,230,230)' : theme.palette.primary.main,
+                                            fontWeight: 600,
+                                            borderRadius: 1.5,                 // 12px
+                                            '& .MuiListItemIcon-root': {
+                                                color: theme.palette.primary.main,
                                             },
-                                        } : {}),
-
+                                            pl: 2.25,
+                                            borderLeft: `3px solid ${theme.palette.primary.main}`,
+                                        },
                                     }}
                                     onClick={() => {
                                         if (!isUpLg) setOpen(false);
@@ -132,36 +148,39 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                                     }}
                                 >
                                     {ChildIcon && (
-                                        <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                                            <ChildIcon />
+                                        <ListItemIcon>
+                                            <ChildIcon/>
                                         </ListItemIcon>
                                     )}
-                                    <ListItemText primary={cLabel} />
+                                    <ListItemText
+                                        primary={cLabel}
+                                        primaryTypographyProps={{ noWrap: true }}
+                                    />
                                 </ListItemButton>
+
                             ))}
                         </List>
-                        <Divider />
-                    </Collapse>,
+                    </Collapse>
+                    ,
                 );
             }
         });
 
         return <List>{items}</List>;
-    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent]);
+    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent, isDark]);
 
     /* ---------- render --------------------------------------------- */
     return (
         <Box sx={{ display: 'flex' }}>
-            <CssBaseline />
 
             {/* AppBar */}
             <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
                 <Toolbar>
                     <IconButton color="inherit" edge="start" onClick={toggle} sx={{ mr: 2 }}>
-                        {open ? <MenuOpenIcon /> : <MenuIcon />}
+                        {open ? <MenuOpenIcon/> : <MenuIcon/>}
                     </IconButton>
-                    <Box sx={{ flexGrow: 1 }} />
-                    <ThemeModeSwitch />
+                    <Box sx={{ flexGrow: 1 }}/>
+                    <ThemeModeSwitch/>
                     <Button color="inherit" onClick={() => router.push('/')}>
                         Home Page
                     </Button>
@@ -172,18 +191,26 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </Toolbar>
             </AppBar>
 
-            {/* Drawer */}
             <Drawer
                 variant={permanent ? 'permanent' : 'temporary'}
                 open={open}
                 onClose={() => setOpen(false)}
                 ModalProps={{ keepMounted: true }}
                 sx={{
-                    width: DRAWER_WIDTH,
+                    width: open ? DRAWER_WIDTH : 0,
                     flexShrink: 0,
+                    whiteSpace: 'nowrap',
                     '& .MuiDrawer-paper': {
-                        width: open ? DRAWER_WIDTH : theme.spacing(7) + 1,
+                        width: open ? DRAWER_WIDTH : 0,
                         overflowX: 'hidden',
+                        borderRight: 0,
+                        boxShadow: open ? '0 0 1px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08)' : 'none',
+                        pointerEvents: open ? 'auto' : 'none',
+                        visibility: open ? 'visible' : 'hidden',
+                        // use proper paper in light, slightly deeper tone in dark
+                        backgroundColor: isDark ? 'rgb(40,40,40)' : theme.palette.background.paper,
+                        // add a subtle divider tint in dark so edges don’t disappear
+                        borderColor: alpha(theme.palette.divider, isDark ? 0.3 : 1),
                         transition: theme.transitions.create('width', {
                             easing: theme.transitions.easing.sharp,
                             duration: open
@@ -192,13 +219,20 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         }),
                     },
                 }}
+
             >
-                <DrawerHeader>
-                    <Typography variant="h5" color="textSecondary" sx={{ fontWeight: 500 }}>
-                        Parcel
-                    </Typography>
-                </DrawerHeader>
-                {drawerMenus}
+                {open && (
+                    <>
+                        {/* spacer so drawer content starts below fixed AppBar */}
+                        <Box sx={{ ...theme.mixins.toolbar }}/>
+                        {/*<DrawerHeader>*/}
+                        {/*    <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: .2 }}>*/}
+                        {/*        Parcel*/}
+                        {/*    </Typography>*/}
+                        {/*</DrawerHeader>*/}
+                        {drawerMenus}
+                    </>
+                )}
             </Drawer>
 
             {/* Main */}
@@ -210,7 +244,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     mt: 8,
                 }}
             >
-                <React.Suspense fallback={<Loading />}>{children}</React.Suspense>
+                <React.Suspense fallback={<Loading/>}>{children}</React.Suspense>
             </Box>
         </Box>
     );

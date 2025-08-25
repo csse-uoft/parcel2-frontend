@@ -31,7 +31,7 @@ export const DrawerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     /* force-open on desktop */
     useEffect(() => {
-        if (permanent) setOpen(true);
+        setOpen(permanent);
     }, [permanent]);
 
     return (

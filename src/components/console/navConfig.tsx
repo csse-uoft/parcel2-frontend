@@ -1,18 +1,34 @@
-import { AddOutlined, AccountCircleOutlined, List, InfoOutlined, SvgIconComponent } from '@mui/icons-material';
-import EmailArrowRightOutline from 'mdi-material-ui/EmailArrowRightOutline';
-import EmailArrowLeftOutline from 'mdi-material-ui/EmailArrowLeftOutline';
-import LockReset from 'mdi-material-ui/LockReset';
-import ContentSave from 'mdi-material-ui/BookSearchOutline';
-import Search from 'mdi-material-ui/ViewListOutline';
-// import SearchInterest from 'mdi-material-ui/TextBoxSearchOutline';
-import ViewMyInterest from 'mdi-material-ui/TextBoxMultipleOutline';
-import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
+import type { ElementType } from 'react';
+import type { SvgIconComponent } from '@mui/icons-material';
+
+import { AddOutlined } from '@mui/icons-material';
+
+import Magnify from 'mdi-material-ui/Magnify';
+import TableSearch from 'mdi-material-ui/TableSearch';
+import TextBoxSearchOutline from 'mdi-material-ui/TextBoxSearchOutline';
+
+import BriefcaseOutline from 'mdi-material-ui/BriefcaseOutline';
+import ClipboardTextOutline from 'mdi-material-ui/ClipboardTextOutline';
 import StarOutline from 'mdi-material-ui/StarOutline';
 
-import type { ElementType } from 'react';
+import HeartOutline from 'mdi-material-ui/HeartOutline';
+import TextBoxMultipleOutline from 'mdi-material-ui/TextBoxMultipleOutline';
 
-/** Use whatever icon type your project actually exports.
- *  `ElementType` works with MUI, @mdi/js react-icons, etc.  */
+import EmailOutline from 'mdi-material-ui/EmailOutline';
+import EmailArrowRightOutline from 'mdi-material-ui/EmailArrowRightOutline';
+import EmailArrowLeftOutline from 'mdi-material-ui/EmailArrowLeftOutline';
+import BookmarkOutline from 'mdi-material-ui/BookmarkOutline';
+
+import AccountCircleOutline from 'mdi-material-ui/AccountCircleOutline';
+import AccountCogOutline from 'mdi-material-ui/AccountCogOutline';
+import OfficeBuildingOutline from 'mdi-material-ui/OfficeBuildingOutline';
+import LockReset from 'mdi-material-ui/LockReset';
+
+import CogOutline from 'mdi-material-ui/CogOutline';
+import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
+import ServerNetworkOutline from 'mdi-material-ui/ServerNetworkOutline';
+
+/** Works with both MUI and MDI icon components */
 export type IconType = ElementType<any> | SvgIconComponent;
 
 export type NavLeaf = {
@@ -35,96 +51,95 @@ export const navConfig: NavConfig = [
     {
         type: 'title',
         label: 'Search Listings',
-        // icon: Search,
+        icon: Magnify,
         children: [
             {
                 label: 'Search Opportunity',
                 href: '/console/opportunity/search',
-                icon: Search,
+                icon: TableSearch
             },
             {
                 label: 'Search Interest',
                 href: '/console/interest/search',
-                icon: Search,
+                icon: TextBoxSearchOutline
             },
+            {
+                label: 'Saved Searches',
+                href: '/console/notification/received',
+                icon: BookmarkOutline
+            }
         ]
     },
     {
         type: 'title',
         label: 'My Opportunities',
-        // icon: List,
+        icon: BriefcaseOutline,
         children: [
             {
-                label: 'Post New Opportunity',
+                label: 'Post Opportunity',
                 href: '/console/opportunity/new',
-                icon: AddOutlined,
+                icon: AddOutlined
             },
             {
                 label: 'View My Opportunities',
                 href: '/console/opportunity',
-                icon: List,
+                icon: ClipboardTextOutline
             },
             {
                 label: 'View Favourites',
                 href: '/console/opportunity/favourites',
-                icon: StarOutline,
-            },
+                icon: StarOutline
+            }
         ]
     },
     {
         type: 'title',
         label: 'My Interests',
-        // icon: List,
+        icon: HeartOutline,
         children: [
             {
                 label: 'Post New Interest',
                 href: '/console/interest/new',
-                icon: AddOutlined,
+                icon: AddOutlined
             },
             {
                 label: 'View My Interests',
                 href: '/console/interest',
-                icon: ViewMyInterest,
-            },
+                icon: TextBoxMultipleOutline
+            }
         ]
     },
     {
         type: 'title',
         label: 'My Messages',
-        // icon: EmailSendOutline,
+        icon: EmailOutline,
         children: [
             {
                 label: 'Sent Messages',
                 href: '/console/notification/sent',
-                icon: EmailArrowRightOutline,
+                icon: EmailArrowRightOutline
             },
             {
                 label: 'Received Messages',
                 href: '/console/notification/received',
-                icon: EmailArrowLeftOutline,
-            },
-            {
-                label: 'Saved Searches',
-                href: '/console/notification/received',
-                icon: ContentSave,
-            },
+                icon: EmailArrowLeftOutline
+            }
         ]
     },
     {
-        type: "title",
+        type: 'title',
         label: 'Account',
-        // hide: true,
-        // icon: AccountCircleOutlined,
+        icon: AccountCogOutline,
         children: [
             {
                 label: 'My Profile',
                 href: '/console/profile/account',
-                icon: AccountCircleOutlined,
+                icon: AccountCircleOutline
             },
             {
                 label: 'My Organization',
                 href: '/console/profile/organization',
-                icon: AccountCircleOutlined,
+                icon: OfficeBuildingOutline
             },
             {
                 label: 'Change Password',
@@ -137,18 +152,18 @@ export const navConfig: NavConfig = [
         type: 'title',
         label: 'System Information',
         hide: true,
-        // icon: InfoOutlined,
+        icon: CogOutline,
         children: [
             {
                 label: 'Admin Dashboard',
                 icon: ViewDashboardOutline,
-                href: '/console/admin/status',
+                href: '/console/admin/status'
             },
             {
                 label: 'Server Status',
                 href: '/console/admin/status',
-                icon: InfoOutlined
+                icon: ServerNetworkOutline
             }
         ]
     }
-]
+];
