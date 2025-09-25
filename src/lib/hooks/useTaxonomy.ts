@@ -23,7 +23,7 @@ function normalizeTaxonomy(json: any): TaxonomyItem[] {
 /** Internal fetcher wrapper that uses your global fetcher and tolerates 404 as empty. */
 async function fetchTaxonomyWithFetcher(iri: string): Promise<TaxonomyItem[]> {
     try {
-        const json = await fetcher<any>(`/taxonomy/${encodeURIComponent(iri)}`);
+        const json = await fetcher<any>(`/api/taxonomy/${encodeURIComponent(iri)}`);
         return normalizeTaxonomy(json);
     } catch (e: any) {
         if (e?.status === 404 || e?.status === 204) return [];
@@ -39,7 +39,7 @@ export function useTaxonomy(
     iri: string,
     config?: SWRConfiguration
 ) {
-    const key = iri ? ['/taxonomy', iri] as const : null;
+    const key = iri ? ['/api/taxonomy', iri] as const : null;
 
     const swr = useSWR<TaxonomyItem[]>(
         key,
