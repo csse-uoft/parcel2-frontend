@@ -12,9 +12,9 @@ interface Props {
 }
 
 const fields = [
-    { key: 'contactName', label: 'Contact Name', size: { xs: 12, sm: 6 }, },
-    { key: 'email', label: 'Email', size: { xs: 12, sm: 6 } },
-    { key: 'phone', label: 'Phone', size: { xs: 12, sm: 6 } },
+    { key: 'contactName', label: 'Contact Name', size: { xs: 12, sm: 6 }, required: true },
+    { key: 'email', label: 'Email', size: { xs: 12, sm: 6 }, required: false },
+    { key: 'phone', label: 'Phone', size: { xs: 12, sm: 6 }, required: false },
 ] as const;
 
 export default function ContactForm({ baseName, disabled }: Props) {
@@ -29,7 +29,7 @@ export default function ContactForm({ baseName, disabled }: Props) {
             {/*</Typography>*/}
 
             <Grid container spacing={2}>
-                {fields.map(({ key, label, size, }) => (
+                {fields.map(({ key, label, size, required }) => (
                     <Grid key={key} size={size}>
                         <ControlledTextInput
                             control={control}
@@ -37,6 +37,7 @@ export default function ContactForm({ baseName, disabled }: Props) {
                             label={label}
                             // required={required}
                             disabled={disabled}
+                            required={required}
                         />
                     </Grid>
                 ))}

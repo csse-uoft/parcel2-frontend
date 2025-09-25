@@ -65,7 +65,7 @@ export const navConfig: NavConfig = [
             },
             {
                 label: 'Saved Searches',
-                href: '/console/notification/received',
+                href: '/console/opportunity/search/saved',
                 icon: BookmarkOutline
             }
         ]
@@ -82,7 +82,7 @@ export const navConfig: NavConfig = [
             },
             {
                 label: 'View My Opportunities',
-                href: '/console/opportunity',
+                href: '/console/opportunity/me',
                 icon: ClipboardTextOutline
             },
             {

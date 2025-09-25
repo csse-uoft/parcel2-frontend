@@ -24,6 +24,8 @@ export const AddressSchema = z.object({
     partLotInformation: z.string().optional(),
     concessionInformation: z.string().optional(),
     propertyIdentificationNumber: z.string().optional(),
-    stringRepresentation: z.string().optional()
+    stringRepresentation: z.string().optional(),
+    latitude: z.coerce.number().min(-90).max(90).optional(),
+    longitude: z.coerce.number().min(-180).max(180).optional(),
 });
 

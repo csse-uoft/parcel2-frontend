@@ -5,16 +5,13 @@ import Image from 'next/image';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import NextLink from 'next/link';
-import ProTip from '@/components/ProTip';
 import Copyright from '@/components/Copyright';
 import background1 from '../../public/background-1.jpg'
 import Header from "@/components/header/Header";
 import { useUserContext } from "@/contexts/UserContext";
 import { Loading } from "@/components/Loading";
 
-export function Background() {
+function Background() {
     return (
         <Image
             alt="Mountains"

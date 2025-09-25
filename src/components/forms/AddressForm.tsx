@@ -42,6 +42,8 @@ const ALL_FIELDS: [keyof AddressFormData, string][] = [
     ['propertyIdentificationNumber', 'Property ID Number'],
     ['stringRepresentation', 'Full Address String'],
     ['locationDescription', 'Location Description'],
+    ['latitude', 'Latitude'],
+    ['longitude', 'Longitude'],
 ];
 
 const SIMPLIFIED_KEYS = new Set([
@@ -53,7 +55,9 @@ const SIMPLIFIED_KEYS = new Set([
     'localityName',
     'provinceName',
     'postalCode',
-    'countryName'
+    'countryName',
+    'latitude',
+    'longitude',
 ]);
 
 const SIMPLIFIED_FIELDS: [keyof AddressFormData, string][] = ALL_FIELDS.filter(([key]) => SIMPLIFIED_KEYS.has(key));

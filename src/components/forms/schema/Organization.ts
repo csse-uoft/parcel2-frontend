@@ -57,5 +57,7 @@ export const OrganizationSchema = z.object({
     mailingSameAsPrimary: z.boolean(),
     deliverySameAsPrimary: z.boolean(),
     primaryContact: ContactSchema,
+    roleTypes: z.array(z.string())
+        .nullish().refine(val => val?.length, { message: 'Select at least one role' }),
     // opportunities: z.string().optional()
 });

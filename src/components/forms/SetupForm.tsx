@@ -15,7 +15,6 @@ import NameFieldsForm, { nameFields } from '@/components/forms/PersonForm';
 import AddressForm from '@/components/forms/AddressForm';
 import { AddressSchema } from "@/components/forms/schema/Address";
 import { PersonNameSchema } from "@/components/forms/schema/Person";
-import OrganizationForm from "@/components/forms/OrganizationForm";
 
 
 const SetupProfileSchema = PersonNameSchema.extend({
@@ -42,7 +41,7 @@ interface Props {
 }
 
 export default function SetupProfileForm({ id, defaultValues, onSubmit, disabled }: Props) {
-    const methods = useForm<SetupProfileFormData>({
+    const methods = useForm<any>({
         defaultValues: { ...initialValues, ...defaultValues },
         resolver: zodResolver(SetupProfileSchema),
         mode: 'all', // or 'onChange' based on your preference

@@ -18,6 +18,8 @@ import ControlledStringArrayField from "@/components/forms/inputs/ControlledStri
 import { MAX_LEGAL_NAMES, MAX_REGISTRATION_NUMBERS, OrganizationSchema } from "@/components/forms/schema/Organization";
 import ContactForm from "@/components/forms/ContactForm";
 import ControlledLegalField from "@/components/forms/inputs/ControlledLegalField";
+import ControlledTaxonomySelect from "@/components/forms/inputs/ControlledTaxonomySelect";
+import { useTaxonomy } from "@/lib/hooks/useTaxonomy";
 
 export type OrganizationFormData = z.infer<typeof OrganizationSchema>;
 
@@ -52,13 +54,15 @@ export const organizationInitialValues = {
 
 export default function OrganizationForm({ id, defaultValues, onSubmit, disabled }: OrganizationFormProps) {
 
-    const methods = useForm<OrganizationFormData>({
+    const methods = useForm<any>({
         defaultValues: defaultValues ?? organizationInitialValues,
         resolver: zodResolver(OrganizationSchema),
         mode: 'all', // or 'onChange' based on your preference
         reValidateMode: 'onChange', // Re-validate on every change
         // shouldUnregister: true, // Unregister fields when they are removed
     });
+
+    const { items: roleTypes, isLoading: loadingRoleTypes } = useTaxonomy('bedeo:RoleType');
 
     const { control, handleSubmit, setValue, watch, formState, getValues } = methods;
 
@@ -71,7 +75,7 @@ export default function OrganizationForm({ id, defaultValues, onSubmit, disabled
 
     return (
         <FormProvider {...methods}>
-            <Box id={id} component="form" onSubmit={handleSubmit((data) => console.log(data))} sx={{ p: 2 }}>
+            <Box id={id} component="form" onSubmit={handleSubmit((data) => console.log(data))} sx={{ p: 2 }} noValidate>
                 {/*<input type="submit"/>*/}
                 <Typography variant="h6" gutterBottom>
                     Organization Details
@@ -96,6 +100,18 @@ export default function OrganizationForm({ id, defaultValues, onSubmit, disabled
                     <Grid size={{ xs: 12 }}>
                         <ControlledTextInput<OrganizationFormData> control={control} name="description" multiline minRows={2}
                                                                    label="Description"/>
+                    </Grid>
+
+
+                    <Grid size={{ xs: 12 }}>
+                        <ControlledTaxonomySelect
+                            name="roleTypes"
+                            label="Roles"
+                            options={roleTypes}
+                            multiple
+                            size={{ xs: 12 }}
+                            required
+                        />
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>

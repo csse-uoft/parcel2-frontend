@@ -33,7 +33,7 @@ export function useUser() {
 export interface Address {
     concessionInformation?: string;
     countryCode?: string;
-    countryName?: string;
+    countryName: string;
     localityName?: string;
     locationDescription?: string;
     lotInformation?: string;
@@ -43,7 +43,7 @@ export interface Address {
     postalStationInformation?: string;
     propertyIdentificationNumber?: string;
     provinceCode?: string;
-    provinceName?: string;
+    provinceName: string;
     ruralRouteIdentifier?: string;
     siteName?: string;
     streetDirection?: string;
@@ -83,7 +83,10 @@ const emptyProfile: Profile = {
         fullName: '',
         firstName: '',
         lastName: '',
-        primaryAddress: {},
+        primaryAddress: {
+            countryName: '',
+            provinceName: '',
+        },
     }
 }
 

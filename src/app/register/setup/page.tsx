@@ -82,7 +82,7 @@ export default function InitialSetupPage() {
                         onSubmit={handleSave}
                     />
 
-                    <OrganizationForm onSubmit={data => console.log(data)}/>
+                    {/*<OrganizationForm onSubmit={data => console.log(data)}/>*/}
                 </Paper>
 
                 {/* Submit button now sits inside the form,

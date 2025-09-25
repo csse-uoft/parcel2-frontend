@@ -41,6 +41,7 @@ export default function MyOrganizationPage() {
             deliveryAddress: data.deliveryAddress ?? {},
             // legalNames: (data.legalNames || []).map((name: string) => ({ value: name })),
             acronyms: (data.acronyms || []).map((a: string) => ({ value: a })),
+            roleTypes: (data.roleTypes || []).map((r: { iri: string; }) => r.iri),
         };
     }, [data]);
 
