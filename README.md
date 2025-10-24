@@ -28,7 +28,7 @@ Parcel2 Frontend is a Next.js 15 App Router project that powers the Parcel2 cons
 
 ## Environment Variables
 
-- `NEXT_PUBLIC_API_BASE`: Base URL for the Parcel2 backend (default `http://localhost:3106`).
+- `NEXT_PUBLIC_API_BASE`: Base URL for the Parcel2 backend (default `http://localhost:3105`).
 
 Environment files follow the standard Next.js naming conventions (`.env.local`, `.env.development`, etc.).
 
