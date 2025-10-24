@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Box,
     Drawer,
@@ -21,10 +21,10 @@ import {
     ExpandLess,
     ExpandMore,
 } from '@mui/icons-material';
-import { styled, useColorScheme, useTheme, alpha, Theme } from '@mui/material/styles';
+import { useColorScheme, useTheme, alpha } from '@mui/material/styles';
 import { useRouter, usePathname } from 'next/navigation';
 
-import { navConfig } from './navConfig';
+import { navConfig, NavSection } from './navConfig';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { Loading } from '@/components/Loading';
@@ -45,14 +45,48 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const isDark = mode === 'dark' || (mode === 'system' && systemMode === 'dark');
 
     const { open, toggle, setOpen, permanent } = useDrawer();
-    const { logout } = useUserContext();
+    const { logout, roles } = useUserContext();
+
+    const hasRequiredRole = useCallback(
+        (required?: string[]) => {
+            if (!required || required.length === 0) return true;
+            return required.some(role => roles.includes(role));
+        },
+        [roles],
+    );
+
+    const visibleSections = useMemo(() => {
+        return navConfig.reduce<NavSection[]>((acc, section) => {
+            const visibleChildren = section.children.filter(child => hasRequiredRole(child.requiredRoles));
+            if (visibleChildren.length === 0) return acc;
+            acc.push({ ...section, children: visibleChildren });
+            return acc;
+        }, []);
+    }, [hasRequiredRole]);
 
     /* ---------- expanded parent menus ------------------------------- */
     const [expanded, setExpanded] = useState<string[]>(
-        navConfig
+        visibleSections
             .filter(i => i.children.some(c => c.href === pathname))
             .map(i => i.label),
     );
+
+    useEffect(() => {
+        setExpanded(prev => {
+            const filteredPrev = prev.filter(label =>
+                visibleSections.some(section => section.label === label),
+            );
+            if (filteredPrev.length === 0) {
+                const initialFromPath = visibleSections
+                    .filter(section => section.children.some(child => child.href === pathname))
+                    .map(section => section.label);
+                if (initialFromPath.length > 0) {
+                    return initialFromPath;
+                }
+            }
+            return filteredPrev;
+        });
+    }, [visibleSections, pathname]);
     const toggleParent = useCallback(
         (id: string) =>
             setExpanded(prev =>
@@ -65,7 +99,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const drawerMenus = useMemo(() => {
         const items: React.ReactElement[] = [];
 
-        navConfig.forEach(({ type = 'menu', label, icon: Icon, children }) => {
+        visibleSections.forEach(({ type = 'menu', label, icon: Icon, children }) => {
             const parentOpen = expanded.includes(label);
 
             if (type === 'title') {
@@ -167,7 +201,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         });
 
         return <List>{items}</List>;
-    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent, isDark]);
+    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent, isDark, visibleSections, open, theme]);
 
     /* ---------- render --------------------------------------------- */
     return (

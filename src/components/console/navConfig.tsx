@@ -23,6 +23,7 @@ import AccountCircleOutline from 'mdi-material-ui/AccountCircleOutline';
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline';
 import OfficeBuildingOutline from 'mdi-material-ui/OfficeBuildingOutline';
 import LockReset from 'mdi-material-ui/LockReset';
+import AccountPlusOutline from 'mdi-material-ui/AccountPlusOutline';
 
 import CogOutline from 'mdi-material-ui/CogOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
@@ -35,6 +36,7 @@ export type NavLeaf = {
     label: string;
     href: string;
     icon?: IconType;
+    requiredRoles?: string[];
 };
 
 export type NavSection = {
@@ -145,6 +147,31 @@ export const navConfig: NavConfig = [
                 label: 'Change Password',
                 href: '/console/profile/password',
                 icon: LockReset
+            }
+        ]
+    },
+    {
+        type: 'title',
+        label: 'User Management',
+        icon: AccountPlusOutline,
+        children: [
+            {
+                label: 'Invite Users',
+                href: '/console/admin/invite',
+                icon: AccountPlusOutline,
+                requiredRoles: ['admin', 'org_admin']
+            },
+            {
+                label: 'Manage Users',
+                href: '/console/admin/users',
+                icon: AccountCogOutline,
+                requiredRoles: ['admin', 'org_admin']
+            },
+            {
+                label: 'Organizations',
+                href: '/console/admin/organizations',
+                icon: OfficeBuildingOutline,
+                requiredRoles: ['admin']
             }
         ]
     },

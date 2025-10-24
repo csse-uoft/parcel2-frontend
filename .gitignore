@@ -11,12 +11,17 @@
 # next.js
 /.next/
 /out/
+/.turbo/
+.swc/
 
 # production
 /build
 
 # misc
 .DS_Store
+*.swp
+.idea/
+.vscode/
 *.pem
 
 # debug
