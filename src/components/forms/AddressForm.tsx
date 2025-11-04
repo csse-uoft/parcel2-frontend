@@ -1,66 +1,58 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import {
-    TextField,
-    Grid,
-    Box,
-    Typography, Fade, Collapse
-} from '@mui/material';
-import { useForm, Controller, Control, useWatch, useFormContext } from 'react-hook-form';
+import React from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
+import Grid from '@mui/material/Grid'; // MUI 7 Grid2 API
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useFormContext } from 'react-hook-form';
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import { ControlledTextInput } from "@/components/forms/inputs/WrappedInputs";
-import { AddressSchema } from "@/components/forms/schema/Address";
+
+import { ControlledTextInput } from '@/components/forms/inputs/WrappedInputs';
+import { AddressSchema } from '@/components/forms/schema/Address';
 
 export type AddressFormData = z.infer<typeof AddressSchema>;
 
-const ALL_FIELDS: [keyof AddressFormData, string][] = [
-    ['unitDesignator', 'Unit'],
-    ['streetNumber', 'Street Number'],
-    ['streetName', 'Street Name'],
-    ['streetType', 'Street Type'],
-    ['streetDirection', 'Street Direction'],
-    ['postalCode', 'Postal Code'],
-    ['localityName', 'City / Locality'],
-    ['provinceName', 'Province'],
-    ['countryName', 'Country'],
+type FieldGroup = 'core' | 'details' | 'geo';
 
+interface FieldConfig {
+    key: keyof AddressFormData;
+    label: string;
+    placeholder?: string;
+    group: FieldGroup;
+    size?: { xs?: number; sm?: number; md?: number };
+}
 
-    ['siteName', 'Site Name'],
-    ['unitIdentifier', 'Unit Identifier'],
-    ['ruralRouteIdentifier', 'Rural Route Identifier'],
-    ['postalBoxIdentifier', 'Postal Box'],
-    ['postalStationInformation', 'Postal Station Info'],
-    // ['provinceCode', 'Province Code'],
-    // ['countryCode', 'Country Code'],
-    ['lotInformation', 'Lot Info'],
-    ['partLotInformation', 'Part Lot Info'],
-    ['concessionInformation', 'Concession Info'],
-    ['propertyIdentificationNumber', 'Property ID Number'],
-    ['stringRepresentation', 'Full Address String'],
-    ['locationDescription', 'Location Description'],
-    ['latitude', 'Latitude'],
-    ['longitude', 'Longitude'],
+const FIELD_CONFIGS: FieldConfig[] = [
+    { key: 'streetNumber', label: 'Street Number', placeholder: 'e.g. 123', group: 'core', size: { xs: 12, sm: 4 } },
+    { key: 'streetName', label: 'Street Name', placeholder: 'e.g. Main', group: 'core', size: { xs: 12, sm: 5 } },
+    { key: 'streetType', label: 'Street Type', placeholder: 'e.g. Avenue, Road', group: 'core', size: { xs: 12, sm: 3 } },
+    { key: 'unitIdentifier', label: 'Unit / Suite', placeholder: 'e.g. 502', group: 'core', size: { xs: 12, sm: 4 } },
+    { key: 'postalCode', label: 'Postal / ZIP Code', group: 'core', size: { xs: 12, sm: 4 } },
+    { key: 'localityName', label: 'City / Locality', group: 'core', size: { xs: 12, sm: 6 } },
+    { key: 'provinceName', label: 'Province / State', group: 'core', size: { xs: 12, sm: 6 } },
+    { key: 'countryName', label: 'Country', group: 'core', size: { xs: 12, sm: 6 } },
+    { key: 'unitDesignator', label: 'Unit Designator', placeholder: 'Suite, Apt, Unit', group: 'details', size: { xs: 12, sm: 4 } },
+    { key: 'streetDirection', label: 'Street Direction', placeholder: 'N, E, S, W', group: 'details', size: { xs: 12, sm: 3 } },
+    { key: 'siteName', label: 'Site Name', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'ruralRouteIdentifier', label: 'Rural Route Identifier', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'postalBoxIdentifier', label: 'Postal Box', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'postalStationInformation', label: 'Postal Station Information', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'provinceCode', label: 'Province Code', group: 'details', size: { xs: 12, sm: 4 } },
+    { key: 'countryCode', label: 'Country Code', group: 'details', size: { xs: 12, sm: 4 } },
+    { key: 'lotInformation', label: 'Lot Information', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'partLotInformation', label: 'Part Lot Information', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'concessionInformation', label: 'Concession Information', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'propertyIdentificationNumber', label: 'Property Identification Number', group: 'details', size: { xs: 12, sm: 6 } },
+    { key: 'stringRepresentation', label: 'Full Address (Single Line)', group: 'details', size: { xs: 12 } },
+    { key: 'locationDescription', label: 'Location Description', group: 'details', size: { xs: 12 } },
+    { key: 'latitude', label: 'Latitude', placeholder: 'Decimal degrees', group: 'geo', size: { xs: 12, sm: 6 } },
+    { key: 'longitude', label: 'Longitude', placeholder: 'Decimal degrees', group: 'geo', size: { xs: 12, sm: 6 } },
 ];
-
-const SIMPLIFIED_KEYS = new Set([
-    'streetNumber',
-    'streetName',
-    'unitDesignator',
-    'streetType',
-    'streetDirection',
-    'localityName',
-    'provinceName',
-    'postalCode',
-    'countryName',
-    'latitude',
-    'longitude',
-]);
-
-const SIMPLIFIED_FIELDS: [keyof AddressFormData, string][] = ALL_FIELDS.filter(([key]) => SIMPLIFIED_KEYS.has(key));
 
 export interface AddressFormProps {
     baseName: string; // Optional base name for form fields
@@ -74,42 +66,88 @@ export default function AddressForm({
                                         simplified: defaultSimplified
                                     }: AddressFormProps) {
 
-    const { control, register, getValues, formState: { errors } } = useFormContext();
+    const { control } = useFormContext();
 
-    const [simplified, setSimplified] = React.useState(defaultSimplified ?? true);
+    const initialShowAdvanced = defaultSimplified === false;
+    const [showAdvanced, setShowAdvanced] = React.useState(initialShowAdvanced);
 
-    const fieldsToShow = simplified
-        ? ALL_FIELDS.filter(([key]) => SIMPLIFIED_KEYS.has(key))
-        : ALL_FIELDS;
+    const coreFields = React.useMemo(
+        () => FIELD_CONFIGS.filter(field => field.group === 'core'),
+        []
+    );
+    const detailFields = React.useMemo(
+        () => FIELD_CONFIGS.filter(field => field.group === 'details'),
+        []
+    );
+    const geoFields = React.useMemo(
+        () => FIELD_CONFIGS.filter(field => field.group === 'geo'),
+        []
+    );
+
+    const renderField = React.useCallback((field: FieldConfig) => {
+        const gridSize = field.size ?? { xs: 12, sm: 6 };
+        const name = `${baseName}.${field.key}` as keyof AddressFormData;
+
+        return (
+            <Grid key={field.key} size={gridSize}>
+                <ControlledTextInput
+                    control={control}
+                    name={name}
+                    label={field.label}
+                    placeholder={field.placeholder}
+                    disabled={disabled}
+                />
+            </Grid>
+        );
+    }, [baseName, control, disabled]);
 
     return (
-        // Add animation to the form
-        <Fade in={true} timeout={500}>
-            <Box sx={{ mt: 0 }}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={simplified}
-                            onChange={(e) => setSimplified(e.target.checked)}
-                            disabled={disabled}
-                        />
-                    }
-                    label="Show simplified address fields only"
-                />
+        <Box sx={{ mt: 1 }}>
+            <Stack spacing={2}>
                 <Grid container spacing={2}>
-                    {fieldsToShow.map(([key, label]) => {
-                        const name = `${baseName}.${key}` as keyof AddressFormData;
-                        return (
-                            // <Fade in={true} timeout={300} key={key}>
-                            <Grid size={{ xs: 12, sm: 4 }} key={key}>
-                                <ControlledTextInput control={control} name={name} label={label} disabled={disabled}/>
-                            </Grid>
-                            // </Fade>
-                        );
-                    })}
+                    {coreFields.map(renderField)}
                 </Grid>
 
-            </Box>
-        </Fade>
+                <Box>
+                    <Button
+                        type="button"
+                        variant="text"
+                        size="small"
+                        startIcon={showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        onClick={() => setShowAdvanced(prev => !prev)}
+                        disabled={disabled}
+                        sx={{ px: 0 }}
+                    >
+                        {showAdvanced ? 'Hide additional address fields' : 'Show additional address fields'}
+                    </Button>
+                </Box>
+
+                <Collapse in={showAdvanced} timeout="auto" unmountOnExit>
+                    <Stack spacing={3} sx={{ mt: 1 }}>
+                        {detailFields.length > 0 && (
+                            <Box>
+                                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
+                                    Additional Details
+                                </Typography>
+                                <Grid container spacing={2}>
+                                    {detailFields.map(renderField)}
+                                </Grid>
+                            </Box>
+                        )}
+
+                        {geoFields.length > 0 && (
+                            <Box>
+                                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
+                                    Coordinates (optional)
+                                </Typography>
+                                <Grid container spacing={2}>
+                                    {geoFields.map(renderField)}
+                                </Grid>
+                            </Box>
+                        )}
+                    </Stack>
+                </Collapse>
+            </Stack>
+        </Box>
     );
 }

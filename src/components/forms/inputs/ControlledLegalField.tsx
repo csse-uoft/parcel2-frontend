@@ -43,7 +43,6 @@ export default function ControlledLegalField({
     const { fields, append, remove } = useFieldArray({ control, name });
 
     const arrayError = (errors as any)?.[name]?.message as string | undefined;
-    console.log(fields)
 
     return (
         <Box sx={{ mt: 2 }}>

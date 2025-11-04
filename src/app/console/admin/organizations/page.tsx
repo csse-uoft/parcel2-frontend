@@ -6,10 +6,6 @@ import {
     Alert,
     Box,
     Button,
-    Divider,
-    List,
-    ListItem,
-    ListItemText,
     Paper,
     Stack,
     Table,
@@ -28,41 +24,77 @@ import { FetcherError } from '@/lib/errors';
 import { Loading } from '@/components/Loading';
 import { AdminOrganization, ConsoleUser, ResetResponse } from '@/components/console/types';
 import { UserDetailsDialog } from '@/components/console/UserDetailsDialog';
-
-const formatAddress = (org: AdminOrganization) => {
-    const addr = org.primaryAddress;
-    if (!addr) return '—';
-    if (addr.stringRepresentation) return addr.stringRepresentation;
-    const parts = [
-        [addr.streetNumber, addr.streetName].filter(Boolean).join(' '),
-        addr.localityName,
-        addr.provinceName,
-        addr.postalCode,
-        addr.countryName,
-    ].filter(Boolean);
-    return parts.length ? parts.join(', ') : '—';
-};
+import { OrganizationDetailsDialog } from '@/components/console/OrganizationDetailsDialog';
+import { CreateOrganizationDialog } from '@/components/console/CreateOrganizationDialog';
+import { OrganizationFormData } from '@/components/forms/OrganizationForm';
+import { buildOrganizationUpdatePayload } from '@/components/forms/organizationFormAdapter';
+import { pruneEmpty } from '@/lib/utils';
 
 export default function ManageOrganizationsPage() {
     const { roles, enqueueMessage, isLoading } = useUserContext();
     const isAdmin = roles.includes('admin');
+    const isOrgAdmin = roles.includes('org_admin');
 
-    const { data: organizations, error: orgError, isLoading: isOrgLoading } = useSWR<AdminOrganization[]>(
+    const {
+        data: adminOrganizations,
+        error: adminOrgError,
+        isLoading: isAdminOrgLoading,
+        mutate: mutateAdminOrganizations,
+    } = useSWR<AdminOrganization[]>(
         isAdmin ? '/api/admin/organizations' : null,
-        endpoint => (endpoint ? fetcher<AdminOrganization[]>(endpoint) : Promise.resolve([])),
+        endpoint => fetcher<AdminOrganization[]>(endpoint),
         { keepPreviousData: true },
     );
 
-    const { data: users, error: userError, isLoading: isUsersLoading, mutate: mutateUsers } = useSWR<ConsoleUser[]>(
-        isAdmin ? '/api/admin/users' : null,
-        endpoint => (endpoint ? fetcher<ConsoleUser[]>(endpoint) : Promise.resolve([])),
+    const {
+        data: managedOrganization,
+        error: managedOrgError,
+        isLoading: isManagedOrgLoading,
+        mutate: mutateManagedOrganization,
+    } = useSWR<AdminOrganization | null>(
+        !isAdmin && isOrgAdmin ? '/api/org-admin/organization' : null,
+        endpoint => fetcher<AdminOrganization>(endpoint),
         { keepPreviousData: true },
     );
+
+    const {
+        data: users,
+        error: userError,
+        isLoading: isUsersLoading,
+        mutate: mutateUsers,
+    } = useSWR<ConsoleUser[]>(
+        isAdmin ? '/api/admin/users' : isOrgAdmin ? '/api/org-admin/users' : null,
+        endpoint => fetcher<ConsoleUser[]>(endpoint),
+        { keepPreviousData: true },
+    );
+
+    const organizations = useMemo(() => {
+        if (isAdmin) return adminOrganizations ?? [];
+        if (isOrgAdmin) return managedOrganization ? [managedOrganization] : [];
+        return [];
+    }, [isAdmin, isOrgAdmin, adminOrganizations, managedOrganization]);
+
+    const orgError = adminOrgError ?? managedOrgError;
+    const isOrgLoading = isAdmin ? isAdminOrgLoading : isManagedOrgLoading;
+
+    const refreshOrganizations = async () => {
+        if (isAdmin && mutateAdminOrganizations) {
+            await mutateAdminOrganizations();
+        } else if (isOrgAdmin && mutateManagedOrganization) {
+            await mutateManagedOrganization();
+        }
+    };
 
     const [selectedOrg, setSelectedOrg] = useState<AdminOrganization | null>(null);
     const [selectedUser, setSelectedUser] = useState<ConsoleUser | null>(null);
     const [isResetting, setIsResetting] = useState(false);
     const [resetResult, setResetResult] = useState<ResetResponse | null>(null);
+    const [isSavingOrg, setIsSavingOrg] = useState(false);
+    const [isDeletingOrg, setIsDeletingOrg] = useState(false);
+    const [formResetKey, setFormResetKey] = useState(0);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [createDialogResetKey, setCreateDialogResetKey] = useState(0);
+    const [isCreatingOrg, setIsCreatingOrg] = useState(false);
 
     const orgUsers = useMemo(() => {
         if (!selectedOrg || !users) return [];
@@ -73,12 +105,15 @@ export default function ManageOrganizationsPage() {
         setSelectedOrg(org);
         setSelectedUser(null);
         setResetResult(null);
+        setFormResetKey(key => key + 1);
     };
 
     const handleCloseOrg = () => {
         setSelectedOrg(null);
         setSelectedUser(null);
         setResetResult(null);
+        setIsSavingOrg(false);
+        setIsDeletingOrg(false);
     };
 
     const handleOpenUser = (user: ConsoleUser) => {
@@ -94,7 +129,10 @@ export default function ManageOrganizationsPage() {
     const handleResetPassword = async (userId: string) => {
         setIsResetting(true);
         try {
-            const result = await postJSON<ResetResponse>(`/api/admin/users/${userId}/reset-password`, { arg: {} });
+            const endpoint = isAdmin
+                ? `/api/admin/users/${userId}/reset-password`
+                : `/api/org-admin/users/${userId}/reset-password`;
+            const result = await postJSON<ResetResponse>(endpoint, { arg: {} });
             setResetResult(result);
             enqueueMessage('Password reset successfully', 'success');
             await mutateUsers();
@@ -109,11 +147,107 @@ export default function ManageOrganizationsPage() {
         }
     };
 
+    const handleSaveOrganization = async (values: OrganizationFormData) => {
+        if (!selectedOrg) return;
+
+        setIsSavingOrg(true);
+
+        try {
+            const endpoint = isAdmin
+                ? `/api/admin/organizations/${encodeURIComponent(selectedOrg.iri)}`
+                : `/api/org-admin/organization`;
+
+            const updated = await fetcher<AdminOrganization>(endpoint, {
+                method: 'PATCH',
+                body: JSON.stringify({ organization: pruneEmpty(buildOrganizationUpdatePayload(values)) }),
+            });
+
+            setSelectedOrg(updated);
+            setFormResetKey(key => key + 1);
+            enqueueMessage('Organization updated successfully', 'success');
+            await refreshOrganizations();
+        } catch (err) {
+            if (err instanceof FetcherError) {
+                enqueueMessage(err.message, 'error');
+            } else {
+                enqueueMessage('Unable to update organization', 'error');
+            }
+        } finally {
+            setIsSavingOrg(false);
+        }
+    };
+
+    const handleDeleteOrganization = async () => {
+        if (!selectedOrg || !isAdmin) return;
+        if (!window.confirm('Delete this organization? This cannot be undone.')) {
+            return;
+        }
+
+        setIsDeletingOrg(true);
+        try {
+            await fetcher<{ message: string }>(
+                `/api/admin/organizations/${encodeURIComponent(selectedOrg.iri)}`,
+                { method: 'DELETE' },
+            );
+
+            enqueueMessage('Organization deleted', 'success');
+            handleCloseOrg();
+            await refreshOrganizations();
+            await mutateUsers();
+        } catch (err) {
+            if (err instanceof FetcherError) {
+                enqueueMessage(err.message, 'error');
+            } else {
+                enqueueMessage('Unable to delete organization', 'error');
+            }
+        } finally {
+            setIsDeletingOrg(false);
+        }
+    };
+
+    const handleOpenCreateOrganization = () => {
+        setCreateDialogResetKey(key => key + 1);
+        setIsCreateDialogOpen(true);
+    };
+
+    const handleCloseCreateOrganization = () => {
+        setIsCreateDialogOpen(false);
+    };
+
+    const handleCreateOrganization = async (values: OrganizationFormData) => {
+        setIsCreatingOrg(true);
+        try {
+            const payload = buildOrganizationUpdatePayload(values);
+            const created = await fetcher<AdminOrganization>(
+                '/api/organizations',
+                {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            enqueueMessage('Organization created successfully', 'success');
+            setIsCreateDialogOpen(false);
+            setSelectedOrg(created);
+            setFormResetKey(key => key + 1);
+            await refreshOrganizations();
+            await mutateUsers();
+        } catch (err) {
+            if (err instanceof FetcherError) {
+                enqueueMessage(err.message, 'error');
+            } else {
+                enqueueMessage('Unable to create organization', 'error');
+            }
+        } finally {
+            setIsCreatingOrg(false);
+        }
+    };
+
     if (isLoading) {
         return <Loading/>;
     }
 
-    if (!isAdmin) {
+    if (!isAdmin && !isOrgAdmin) {
         return (
             <Box>
                 <Typography variant="h4" gutterBottom>
@@ -143,6 +277,14 @@ export default function ManageOrganizationsPage() {
                     Review organization profiles and manage their members.
                 </Typography>
             </Box>
+
+            {isAdmin && (
+                <Stack direction="row" justifyContent="flex-end">
+                    <Button variant="contained" onClick={handleOpenCreateOrganization}>
+                        Create Organization
+                    </Button>
+                </Stack>
+            )}
 
             {(isOrgLoading || isUsersLoading) && <Loading/>}
 
@@ -190,59 +332,20 @@ export default function ManageOrganizationsPage() {
                 </TableContainer>
             )}
 
-            {selectedOrg && (
-                <Paper sx={{ p: { xs: 2, md: 4 } }}>
-                    <Stack spacing={2}>
-                        <Box>
-                            <Typography variant="h5">{selectedOrg.name ?? 'Organization Details'}</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                IRI: {selectedOrg.iri}
-                            </Typography>
-                        </Box>
-                        <DetailRow label="Description" value={selectedOrg.description ?? selectedOrg.briefDescription ?? '—'} />
-                        <DetailRow label="Email" value={selectedOrg.email ?? '—'} />
-                        <DetailRow label="Phone" value={selectedOrg.phone ?? '—'} />
-                        <DetailRow label="Mission" value={selectedOrg.missionStatement ?? '—'} />
-                        <DetailRow label="Values" value={selectedOrg.valuesStatement ?? '—'} />
-                        <DetailRow label="Structure" value={selectedOrg.organizationStructure ?? '—'} />
-                        <DetailRow label="Primary Contact" value={selectedOrg.primaryContact?.contactName ?? '—'} />
-                        <DetailRow label="Contact Email" value={selectedOrg.primaryContact?.email ?? '—'} />
-                        <DetailRow label="Contact Phone" value={selectedOrg.primaryContact?.phone ?? '—'} />
-                        <DetailRow label="Address" value={formatAddress(selectedOrg)} />
-
-                        <Divider sx={{ my: 2 }} />
-                        <Typography variant="h6">Members</Typography>
-
-                        {orgUsers.length === 0 && (
-                            <Alert severity="info">No members found for this organization.</Alert>
-                        )}
-
-                        {orgUsers.length > 0 && (
-                            <List dense disablePadding>
-                                {orgUsers.map(user => (
-                                    <ListItem
-                                        key={user._id}
-                                        secondaryAction={
-                                            <Button size="small" onClick={() => handleOpenUser(user)}>
-                                                View Details
-                                            </Button>
-                                        }
-                                    >
-                                        <ListItemText
-                                            primary={user.username ?? user.email}
-                                            secondary={user.email}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        )}
-
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button onClick={handleCloseOrg}>Close</Button>
-                        </Box>
-                    </Stack>
-                </Paper>
-            )}
+            <OrganizationDetailsDialog
+                open={Boolean(selectedOrg)}
+                organization={selectedOrg}
+                members={orgUsers}
+                canEdit={isAdmin || isOrgAdmin}
+                canDelete={isAdmin && orgUsers.length === 0}
+                isSaving={isSavingOrg}
+                isDeleting={isDeletingOrg}
+                formResetKey={formResetKey}
+                onClose={handleCloseOrg}
+                onSave={handleSaveOrganization}
+                onDelete={isAdmin ? handleDeleteOrganization : undefined}
+                onSelectMember={handleOpenUser}
+            />
 
             <UserDetailsDialog
                 user={selectedUser}
@@ -253,15 +356,14 @@ export default function ManageOrganizationsPage() {
                 isResetting={isResetting}
                 resetResult={resetResult}
             />
-        </Stack>
-    );
-}
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-    return (
-        <Stack spacing={0.5}>
-            <Typography variant="body2" color="text.secondary">{label}</Typography>
-            <Typography variant="body1">{value}</Typography>
+            <CreateOrganizationDialog
+                open={isCreateDialogOpen}
+                onClose={handleCloseCreateOrganization}
+                onSubmit={handleCreateOrganization}
+                isSubmitting={isCreatingOrg}
+                resetKey={createDialogResetKey}
+            />
         </Stack>
     );
 }

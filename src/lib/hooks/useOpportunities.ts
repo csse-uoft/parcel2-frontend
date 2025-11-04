@@ -36,10 +36,23 @@ export function useCreateOpportunity() {
 }
 
 // Update
-export function useUpdateOpportunity(iri: string) {
-    const key = `/api/opportunities/${encodeURIComponent(iri)}`;
-    return useSWRMutation<OpportunityDTO, FetcherError, string, OpportunityFormData>(
+export function useUpdateOpportunity(iri?: string | null) {
+    let hook;
+    if (!iri) {
+        // Return a no-op mutation if no IRI is provided
+        hook = {
+            trigger: async () => {
+                throw new Error('No IRI provided for updating opportunity');
+            },
+            isMutating: false,
+            error: undefined,
+        };
+    }
+    const key = `/api/opportunities/${encodeURIComponent(iri!)}`;
+    hook = useSWRMutation<OpportunityDTO, FetcherError, string, OpportunityFormData>(
         key,
         (url, { arg }) => postJSON<OpportunityDTO>(url, { arg: pruneEmpty(formToUpsertBody(arg)) })
     );
+
+    return hook;
 }

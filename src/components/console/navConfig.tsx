@@ -60,11 +60,11 @@ export const navConfig: NavConfig = [
                 href: '/console/opportunity/search',
                 icon: TableSearch
             },
-            {
-                label: 'Search Interest',
-                href: '/console/interest/search',
-                icon: TextBoxSearchOutline
-            },
+            // {
+            //     label: 'Search Interest',
+            //     href: '/console/interest/search',
+            //     icon: TextBoxSearchOutline
+            // },
             {
                 label: 'Saved Searches',
                 href: '/console/opportunity/search/saved',
@@ -94,23 +94,23 @@ export const navConfig: NavConfig = [
             }
         ]
     },
-    {
-        type: 'title',
-        label: 'My Interests',
-        icon: HeartOutline,
-        children: [
-            {
-                label: 'Post New Interest',
-                href: '/console/interest/new',
-                icon: AddOutlined
-            },
-            {
-                label: 'View My Interests',
-                href: '/console/interest',
-                icon: TextBoxMultipleOutline
-            }
-        ]
-    },
+    // {
+    //     type: 'title',
+    //     label: 'My Interests',
+    //     icon: HeartOutline,
+    //     children: [
+    //         {
+    //             label: 'Post New Interest',
+    //             href: '/console/interest/new',
+    //             icon: AddOutlined
+    //         },
+    //         {
+    //             label: 'View My Interests',
+    //             href: '/console/interest',
+    //             icon: TextBoxMultipleOutline
+    //         }
+    //     ]
+    // },
     {
         type: 'title',
         label: 'My Messages',
@@ -171,7 +171,7 @@ export const navConfig: NavConfig = [
                 label: 'Organizations',
                 href: '/console/admin/organizations',
                 icon: OfficeBuildingOutline,
-                requiredRoles: ['admin']
+                requiredRoles: ['admin', 'org_admin']
             }
         ]
     },

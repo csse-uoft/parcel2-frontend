@@ -7,7 +7,7 @@ import {
     Grid,
     Typography,
 } from '@mui/material';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, type SubmitHandler, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -34,62 +34,66 @@ const initialValues: SetupProfileFormData = {
 };
 
 interface Props {
-    id?: string; // Optional ID for the form, useful for editing existing profiles
+    id?: string;
     defaultValues?: Partial<SetupProfileFormData>;
     onSubmit: (data: SetupProfileFormData) => void;
-    disabled?: boolean; // Optional prop to disable the form
+    disabled?: boolean;
+    showSubmitButton?: boolean;
+    children?: React.ReactNode;
 }
 
-export default function SetupProfileForm({ id, defaultValues, onSubmit, disabled }: Props) {
-    const methods = useForm<any>({
+export default function SetupProfileForm({
+                                              id,
+                                              defaultValues,
+                                              onSubmit,
+                                              disabled,
+                                              showSubmitButton = true,
+                                              children,
+                                          }: Props) {
+    const methods = useForm<SetupProfileFormData>({
         defaultValues: { ...initialValues, ...defaultValues },
-        resolver: zodResolver(SetupProfileSchema),
-        mode: 'all', // or 'onChange' based on your preference
-        reValidateMode: 'onChange', // Re-validate on every change
+        resolver: zodResolver(SetupProfileSchema) as Resolver<SetupProfileFormData>,
+        mode: 'all',
+        reValidateMode: 'onChange',
     });
 
-
-    const { control, handleSubmit, setValue, watch, formState, getValues } = methods;
-
-    const primaryAddress = watch('primaryAddress');
-    console.log("Errors", formState.errors);
-    console.log('Form values:', getValues());
-
+    const submitHandler = React.useCallback<SubmitHandler<SetupProfileFormData>>(
+        values => onSubmit(values),
+        [onSubmit]
+    );
 
     return (
-        <>
-            <FormProvider {...methods}>
+        <FormProvider {...methods}>
+            <Box
+                component="form"
+                onSubmit={methods.handleSubmit(submitHandler)}
+                id={id}
+                sx={{ p: 2, maxWidth: 900, mx: 'auto' }}
+            >
+                <NameFieldsForm/>
 
-                <Box
-                    component="form"
-                    onSubmit={methods.handleSubmit(onSubmit)}
-                    id={id}
-                    sx={{ p: 2, maxWidth: 900, mx: 'auto' }}
-                >
+                <Grid size={{ xs: 12 }} sx={{ mt: 4 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Primary Address
+                    </Typography>
+                    <AddressForm baseName="primaryAddress" simplified disabled={disabled}/>
+                </Grid>
 
-                    {/*<input type="submit"/>*/}
-                    <NameFieldsForm/>
-
+                {showSubmitButton && (
                     <Grid size={{ xs: 12 }} sx={{ mt: 4 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Primary Address
-                        </Typography>
-                        <AddressForm baseName="primaryAddress" simplified/>
-                    </Grid>
-
-                    <Grid size={{ xs: 12 }} sx={{ mt: 4 }}>
-
                         <Button
                             variant="contained"
                             type="submit"
                             sx={{ py: 1.2 }}
+                            disabled={disabled}
                         >
                             Save Profile
                         </Button>
                     </Grid>
-                </Box>
-            </FormProvider>
-        </>
+                )}
 
+                {children}
+            </Box>
+        </FormProvider>
     );
 }

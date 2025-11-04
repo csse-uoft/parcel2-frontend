@@ -18,7 +18,6 @@ export default function ProfilePage() {
     const { profile, isLoading, isError, mutate } = useUserProfile();
 
     /* --- UI state ------------------------------------------------- */
-    const [isEditing, setIsEditing] = useState(false);
     const [saving, setSaving] = useState(false);
 
     /* --- Convert remote data → form defaults ---------------------- */
@@ -63,7 +62,6 @@ export default function ProfilePage() {
             });
 
             await mutate();          // refresh SWR cache
-            setIsEditing(false);
         } finally {
             setSaving(false);
         }
@@ -89,49 +87,33 @@ export default function ProfilePage() {
     /* --- Main UI --------------------------------------------------- */
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="start"
-                sx={{ mb: 2 }}
-            >
+            <Stack spacing={0.5} sx={{ mb: 2 }}>
                 <Typography variant="h4" gutterBottom>
                     Profile
                 </Typography>
-
-                {!isEditing ? (
-                    <Button variant="outlined" onClick={() => setIsEditing(true)}>
-                        Edit
-                    </Button>
-                ) : (
-                    <Stack direction="row" spacing={1}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setIsEditing(false)}
-                            disabled={saving}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            type="submit"
-                            form="profile-form"
-                            disabled={saving}
-                        >
-                            {saving ? 'Saving…' : 'Save'}
-                        </Button>
-                    </Stack>
-                )}
+                <Typography variant="body2" color="text.secondary">
+                    Update your personal details and primary address.
+                </Typography>
             </Stack>
 
             <Paper elevation={3} sx={{ p: 3 }}>
-                {/* Form is self-contained.  Disabled when not editing. */}
                 <SetupProfileForm
                     id="profile-form"          /* connect Save button */
                     defaultValues={defaultValues}
                     onSubmit={handleSave}
-                    disabled={!isEditing}
+                    disabled={saving}
+                    showSubmitButton={false}
                 />
+                <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        form="profile-form"
+                        disabled={saving}
+                    >
+                        {saving ? 'Saving…' : 'Save'}
+                    </Button>
+                </Stack>
             </Paper>
         </Container>
     );

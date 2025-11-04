@@ -37,12 +37,19 @@ export default function OpportunityEditor(props: Props) {
 
     // create or edit
     const isEdit = props.mode === 'edit';
+    const opportunityIri = props.iri;
+
     const { data: opDTO, error: loadErr, isLoading: loadingOp, mutate: mutateOp } =
-        useOpportunity(isEdit ? props.iri : null);
+        useOpportunity(isEdit && opportunityIri ? opportunityIri : null);
 
     const { trigger: createTrigger, isMutating: creating, error: createErr } = useCreateOpportunity();
-    const { trigger: updateTrigger, isMutating: updating, error: updateErr } =
-        isEdit ? useUpdateOpportunity(props.iri!) : ({ trigger: undefined, isMutating: false, error: undefined } as any);
+    const {
+        trigger: updateTrigger,
+        isMutating: updateIsMutating,
+        error: updateErr,
+    } = useUpdateOpportunity(isEdit && opportunityIri ? opportunityIri : undefined);
+
+    const updating = isEdit ? updateIsMutating : false;
 
     const saving = creating || updating;
 
@@ -63,6 +70,9 @@ export default function OpportunityEditor(props: Props) {
 
     async function handleSubmit(data: OpportunityFormData) {
         if (isEdit) {
+            if (!opportunityIri) {
+                throw new Error('Missing opportunity identifier for update.');
+            }
             const updated = await updateTrigger(data);
             await mutateOp(updated, { revalidate: false });
             return;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
     Container,
     Typography,
@@ -10,78 +10,81 @@ import {
     Stack,
 } from '@mui/material';
 import useSWR from 'swr';
-import OrganizationForm, {
-    OrganizationFormData, organizationInitialValues,   // <- export the type from your form file
-} from '@/components/forms/OrganizationForm';
 
-
-const fetcher = (url: string) =>
-    fetch(url, { credentials: 'include' }).then((r) => r.json());
+import { useUserContext } from '@/contexts/UserContext';
+import { fetcher } from '@/lib/fetcher';
+import { FetcherError } from '@/lib/errors';
+import OrganizationForm, { OrganizationFormData } from '@/components/forms/OrganizationForm';
+import {
+    mapOrganizationToFormData,
+    buildOrganizationUpdatePayload,
+} from '@/components/forms/organizationFormAdapter';
+import type { AdminOrganization } from '@/components/console/types';
 
 export default function MyOrganizationPage() {
+    const { enqueueMessage } = useUserContext();
 
-    const { data, error, isLoading, mutate } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_BASE}/api/profile/org`,
-        fetcher
+    const fetchOrganization = useCallback(async (url: string) => {
+        try {
+            return await fetcher<AdminOrganization | null>(url);
+        } catch (err) {
+            if (err instanceof FetcherError && err.status === 404) {
+                return null;
+            }
+            throw err;
+        }
+    }, []);
+
+    const { data, error, isLoading, mutate } = useSWR<AdminOrganization | null>(
+        '/api/profile/org',
+        fetchOrganization
     );
 
-    const [isEditing, setIsEditing] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [resetToken, setResetToken] = useState(0);
 
+    const hasOrganization = Boolean(data);
 
-    const defaultValues: OrganizationFormData | undefined = useMemo(() => {
-        if (!data) return undefined;
+    const defaultValues: OrganizationFormData = useMemo(
+        () => mapOrganizationToFormData(data ?? undefined),
+        [data]
+    );
 
-        // adjust shape if the API fields differ
-        return {
-            ...organizationInitialValues,
-            ...data,
-            primaryAddress: data.primaryAddress ?? organizationInitialValues.primaryAddress,
-            mailingAddress: data.mailingAddress ?? {},
-            deliveryAddress: data.deliveryAddress ?? {},
-            // legalNames: (data.legalNames || []).map((name: string) => ({ value: name })),
-            acronyms: (data.acronyms || []).map((a: string) => ({ value: a })),
-            roleTypes: (data.roleTypes || []).map((r: { iri: string; }) => r.iri),
-        };
-    }, [data]);
-
-
-    const handleSave = async (formData: OrganizationFormData) => {
+    const handleSave = useCallback(async (formData: OrganizationFormData) => {
         try {
             setSaving(true);
-            await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE}/api/profile/org`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        organization: {
-                            ...formData,
-                            // legalNames: formData.legalNames.map((name) => name.value),
-                            acronyms: formData.acronyms?.map((a) => a.value),
-                        }
-                    }),
-                }
-            );
+            const payload = buildOrganizationUpdatePayload(formData);
+            await fetcher('/api/profile/org', {
+                method: 'POST',
+                body: JSON.stringify({ organization: payload }),
+            });
 
-            await mutate();            // refresh SWR cache
-            setIsEditing(false);
+            await mutate();
+            setResetToken(token => token + 1);
+            enqueueMessage(
+                hasOrganization ? 'Organization updated successfully' : 'Organization created successfully',
+                'success'
+            );
+        } catch (err) {
+            if (err instanceof FetcherError) {
+                enqueueMessage(err.message, 'error');
+            } else {
+                enqueueMessage('Unable to update organization', 'error');
+            }
         } finally {
             setSaving(false);
         }
-    };
+    }, [enqueueMessage, hasOrganization, mutate]);
 
-
-    if (isLoading || !defaultValues) {
+    if (isLoading && !data) {
         return (
             <Container sx={{ py: 4 }}>
-                <CircularProgress/>
+                <CircularProgress />
             </Container>
         );
     }
 
-    if (error) {
+    if (error && !data) {
         return (
             <Container sx={{ py: 4 }}>
                 <Typography color="error">
@@ -91,51 +94,37 @@ export default function MyOrganizationPage() {
         );
     }
 
-
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="start"
-                sx={{ mb: 2 }}
-            >
+            <Stack spacing={0.5} sx={{ mb: 2 }}>
                 <Typography variant="h4" gutterBottom>
-                    My Organization
+                    {hasOrganization ? 'My Organization' : 'Create Organization'}
                 </Typography>
-
-                {!isEditing ? (
-                    <Button variant="outlined" onClick={() => setIsEditing(true)}>
-                        Edit
-                    </Button>
-                ) : (
-                    <Stack direction="row" spacing={1}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setIsEditing(false)}
-                            disabled={saving}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            type="submit"
-                            form="organization-form"
-                            disabled={saving}
-                        >
-                            {saving ? 'Saving…' : 'Save'}
-                        </Button>
-                    </Stack>
+                {!hasOrganization && (
+                    <Typography variant="body2" color="text.secondary">
+                        Complete the details below to create your organization profile.
+                    </Typography>
                 )}
             </Stack>
 
             <Paper elevation={3} sx={{ p: 3 }}>
                 <OrganizationForm
-                    id="organization-form"
+                    formId="my-organization-form"
                     defaultValues={defaultValues}
+                    disabled={saving}
+                    resetKey={resetToken}
                     onSubmit={handleSave}
-                    disabled={!isEditing}
-                />
+                >
+                    <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            disabled={saving}
+                        >
+                            {saving ? 'Saving…' : hasOrganization ? 'Save' : 'Create'}
+                        </Button>
+                    </Stack>
+                </OrganizationForm>
             </Paper>
         </Container>
     );

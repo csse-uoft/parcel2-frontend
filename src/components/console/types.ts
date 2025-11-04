@@ -23,6 +23,7 @@ export interface AdminOrganization {
     missionStatement?: string;
     valuesStatement?: string;
     organizationStructure?: string;
+    tradeName?: string;
     primaryContact?: {
         contactName?: string;
         email?: string;

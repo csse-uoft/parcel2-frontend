@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
     Box,
     Grid,
@@ -51,8 +51,12 @@ export default function ControlledStringArrayField({ name, label = "Items", disa
                     sx={{ mb: 1 }}
                 >
                     <Grid size={{ xs: 11, sm: 10 }}>
-                        <ControlledTextInput control={control} name={`${name}.${idx}.value` as string}
-                                             label={label.slice(0, -1) + ' ' + (idx + 1)}/>
+                        <ControlledTextInput
+                            control={control}
+                            name={`${name}.${idx}.value` as string}
+                            label={label.slice(0, -1) + ' ' + (idx + 1)}
+                            disabled={disabled}
+                        />
                     </Grid>
 
                     <Grid size={{ xs: 1, sm: 2 }}>
