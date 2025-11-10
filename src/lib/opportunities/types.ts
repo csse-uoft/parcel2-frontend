@@ -13,6 +13,11 @@ export interface OpportunityDTO {
     projectType?: TaxonomyDTO;
     projectStage?: TaxonomyDTO;
     primaryContact?: { name?: string; email?: string; phone?: string; [k: string]: unknown };
+    organization?: {
+        iri: string;
+        name?: string;
+    };
+    organizationIri?: string;
     partners?: any[];
     land?: any;
     additionalInfo?: {

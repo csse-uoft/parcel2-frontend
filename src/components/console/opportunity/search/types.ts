@@ -32,6 +32,8 @@ export type OpportunityDetail = {
     projectType?: { iri: string; name?: string } | string;
     projectStage?: { iri: string; name?: string } | string;
     primaryContact?: { contactName?: string };
+    organization?: { iri: string; name?: string };
+    organizationIri?: string;
     land?: { notes?: string };
     additionalInfo?: {
         images?: string[];

@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 import {
     Alert,
@@ -27,6 +26,8 @@ import { FetcherError } from '@/lib/errors';
 import { fetcher, postJSON } from '@/lib/fetcher';
 import { OrganizationFormData } from '@/components/forms/OrganizationForm';
 import { buildOrganizationUpdatePayload } from '@/components/forms/organizationFormAdapter';
+import { useAdminOrganizations, useManagedOrganization } from '@/lib/hooks/useOrganizations';
+import { useScopedConsoleUsers } from '@/lib/hooks/useConsoleUsers';
 
 interface InviteResponse {
     message?: string;
@@ -63,17 +64,6 @@ type OrgInviteFormValues = BaseInviteFormValues;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INVITE_ENDPOINT = '/api/org-admin/users/invite';
 
-const fetchManagedOrganization = async (url: string) => {
-    try {
-        return await fetcher<AdminOrganization>(url);
-    } catch (err) {
-        if (err instanceof FetcherError && err.status === 404) {
-            return null;
-        }
-        throw err;
-    }
-};
-
 export default function InviteUsersPage() {
     const { roles, enqueueMessage, isLoading } = useUserContext();
     const isAdmin = roles.includes('admin');
@@ -84,32 +74,20 @@ export default function InviteUsersPage() {
         error: organizationsError,
         isLoading: isOrganizationsLoading,
         mutate: mutateOrganizations,
-    } = useSWR<AdminOrganization[]>(
-        isAdmin ? '/api/admin/organizations' : null,
-        endpoint => fetcher<AdminOrganization[]>(endpoint),
-        { keepPreviousData: true },
-    );
+    } = useAdminOrganizations(isAdmin);
 
     const {
         data: users,
         error: usersError,
         isLoading: isUsersLoading,
         mutate: mutateUsers,
-    } = useSWR<ConsoleUser[]>(
-        isAdmin ? '/api/admin/users' : null,
-        endpoint => fetcher<ConsoleUser[]>(endpoint),
-        { keepPreviousData: true },
-    );
+    } = useScopedConsoleUsers(isAdmin ? 'admin' : null);
 
     const {
         data: managedOrganization,
         error: managedOrgError,
         isLoading: isManagedOrgLoading,
-    } = useSWR<AdminOrganization | null>(
-        !isAdmin && isOrgAdmin ? '/api/org-admin/organization' : null,
-        fetchManagedOrganization,
-        { keepPreviousData: true },
-    );
+    } = useManagedOrganization(!isAdmin && isOrgAdmin);
 
     const adminInviteForm = useForm<AdminInviteFormValues>({
         defaultValues: {
@@ -146,7 +124,10 @@ export default function InviteUsersPage() {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [previewOrganization, setPreviewOrganization] = useState<AdminOrganization | null>(null);
 
-    const availableOrganizations = useMemo(() => organizations ?? [], [organizations]);
+    const availableOrganizations: AdminOrganization[] = useMemo(
+        () => organizations ?? [],
+        [organizations]
+    );
     const hasOrganizations = availableOrganizations.length > 0;
 
     const organizationStats = useMemo(() => {
@@ -156,8 +137,8 @@ export default function InviteUsersPage() {
         }
 
         for (const org of availableOrganizations) {
-            const members = users.filter(user => user.organizationIRI === org.iri);
-            const adminCount = members.filter(user => (user.roles ?? []).includes('org_admin')).length;
+            const members = users.filter((user: ConsoleUser) => user.organizationIRI === org.iri);
+            const adminCount = members.filter((user: ConsoleUser) => (user.roles ?? []).includes('org_admin')).length;
             map.set(org.iri, {
                 userCount: members.length,
                 adminCount,
@@ -170,7 +151,7 @@ export default function InviteUsersPage() {
 
     const selectedOrgIri = adminInviteForm.watch('organizationIri');
     const selectedOrganization = useMemo(
-        () => availableOrganizations.find(org => org.iri === selectedOrgIri) ?? null,
+        () => availableOrganizations.find((org: AdminOrganization) => org.iri === selectedOrgIri) ?? null,
         [availableOrganizations, selectedOrgIri]
     );
     const selectedOrganizationMembers = selectedOrganization

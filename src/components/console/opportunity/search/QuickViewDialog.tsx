@@ -22,6 +22,14 @@ import Link from 'next/link';
 import { OpportunityDetail } from './types';
 import { absUrl } from './utils';
 import { fetcher } from '@/lib/fetcher';
+import { useCreateChat } from '@/lib/hooks/useChat';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/navigation';
+import { FetcherError } from '@/lib/errors';
+import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { useOpportunityFavourites } from '@/contexts/OpportunityFavouritesContext';
 
 // Reuse the image viewer you already built earlier
 import ImageViewer from '@/components/media/ImageViewer';
@@ -38,6 +46,82 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
         open && id ? `/api/opportunities/${encodeURIComponent(id)}` : null,
         fetcher
     );
+    const { trigger: createChat, isMutating: creatingChat } = useCreateChat();
+    const { enqueueSnackbar } = useSnackbar();
+    const router = useRouter();
+    const { isFavourite, toggleFavourite } = useOpportunityFavourites();
+
+    const organizationIri = data?.organization?.iri ?? data?.organizationIri ?? null;
+    const organizationName = data?.organization?.name ?? undefined;
+    const opportunityIri = data?.iri ?? null;
+
+    const projectTypeName = typeof data?.projectType === 'object' ? data?.projectType?.name ?? undefined : undefined;
+    const stageName = typeof data?.projectStage === 'object' ? data?.projectStage?.name ?? undefined : undefined;
+
+    const favouriteMeta = React.useMemo(
+        () => (
+            opportunityIri
+                ? {
+                    iri: opportunityIri,
+                    name: data?.name ?? undefined,
+                    organizationName,
+                    projectTypeName,
+                    stageName,
+                }
+                : null
+        ),
+        [data?.name, opportunityIri, organizationName, projectTypeName, stageName],
+    );
+
+    const isCurrentFavourite = React.useMemo(
+        () => (opportunityIri ? isFavourite(opportunityIri) : false),
+        [isFavourite, opportunityIri],
+    );
+
+    const [favouritePending, setFavouritePending] = React.useState(false);
+
+    const handleToggleFavourite = React.useCallback(async () => {
+        if (!opportunityIri || !favouriteMeta) return;
+        const wasFavourite = isFavourite(opportunityIri);
+        setFavouritePending(true);
+        try {
+            await toggleFavourite(favouriteMeta);
+            enqueueSnackbar(wasFavourite ? 'Removed from favourites.' : 'Added to favourites.', {
+                variant: 'success',
+            });
+        } catch (error) {
+            const message = error instanceof FetcherError
+                ? error.message
+                : (error as Error)?.message ?? 'Unable to update favourites.';
+            enqueueSnackbar(message, { variant: 'error' });
+        } finally {
+            setFavouritePending(false);
+        }
+    }, [enqueueSnackbar, favouriteMeta, isFavourite, opportunityIri, toggleFavourite]);
+
+    const handleContactOrganization = React.useCallback(async () => {
+        if (!opportunityIri || !organizationIri) {
+            enqueueSnackbar('Organization information unavailable for this opportunity.', { variant: 'warning' });
+            return;
+        }
+
+        try {
+            const result = await createChat({ opportunityIri, organizationIri });
+            const roomId = result?.room?.id;
+            enqueueSnackbar('Conversation opened with the organization.', { variant: 'success' });
+            onClose();
+            if (roomId) {
+                router.push(`/console/chat?room=${encodeURIComponent(roomId)}`);
+            } else {
+                router.push('/console/chat');
+            }
+        } catch (err) {
+            const message = err instanceof FetcherError
+                ? err.message
+                : (err as Error)?.message ?? 'Unable to start chat.';
+            enqueueSnackbar(message, { variant: 'error' });
+        }
+    }, [createChat, enqueueSnackbar, opportunityIri, organizationIri, router, onClose]);
 
     // Build a complete, de-duplicated image list: primary first, then the rest
     const allImages = React.useMemo(() => {
@@ -157,6 +241,27 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
             </DialogContent>
 
             <DialogActions>
+                {opportunityIri && (
+                    <Button
+                        variant={isCurrentFavourite ? 'contained' : 'outlined'}
+                        color={isCurrentFavourite ? 'primary' : 'inherit'}
+                        startIcon={isCurrentFavourite ? <BookmarkIcon /> : <BookmarkBorderOutlinedIcon />}
+                        onClick={handleToggleFavourite}
+                        disabled={favouritePending}
+                    >
+                        {isCurrentFavourite ? 'Favourited' : 'Save to favourites'}
+                    </Button>
+                )}
+                {organizationIri && (
+                    <Button
+                        variant="contained"
+                        startIcon={<ChatOutlinedIcon />}
+                        onClick={handleContactOrganization}
+                        disabled={creatingChat}
+                    >
+                        Message {organizationName ?? 'organization'}
+                    </Button>
+                )}
                 {id && (
                     <Button
                         component={Link}
@@ -167,7 +272,7 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
                         Open full page
                     </Button>
                 )}
-                <Button onClick={onClose} variant="contained">Close</Button>
+                <Button onClick={onClose} variant="outlined">Close</Button>
             </DialogActions>
 
             {/* Image viewer (supports wheel-zoom and controls from your existing component) */}

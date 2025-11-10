@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import useSWR from 'swr';
 import {
     Alert,
     Box,
@@ -21,11 +20,12 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 
 import { useUserContext } from '@/contexts/UserContext';
-import { fetcher, postJSON } from '@/lib/fetcher';
+import { postJSON } from '@/lib/fetcher';
 import { FetcherError } from '@/lib/errors';
 import { Loading } from '@/components/Loading';
 import { ConsoleUser, ResetResponse } from '@/components/console/types';
 import { UserDetailsDialog } from '@/components/console/UserDetailsDialog';
+import { useConsoleUsers } from '@/lib/hooks/useConsoleUsers';
 
 const formatDateTime = (value?: string | null) => {
     if (!value) return '—';
@@ -49,11 +49,7 @@ export default function ManageUsersPage() {
         return null;
     }, [isAdmin, isOrgAdmin]);
 
-    const { data: users, error, isLoading: isUsersLoading, mutate } = useSWR<ConsoleUser[]>(
-        listEndpoint,
-        endpoint => (endpoint ? fetcher<ConsoleUser[]>(endpoint) : Promise.resolve([])),
-        { keepPreviousData: true },
-    );
+    const { data: users, error, isLoading: isUsersLoading, mutate } = useConsoleUsers(listEndpoint);
 
     const [selectedUser, setSelectedUser] = useState<ConsoleUser | null>(null);
     const [isResetting, setIsResetting] = useState(false);

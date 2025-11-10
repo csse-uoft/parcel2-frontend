@@ -9,38 +9,22 @@ import {
     Button,
     Stack,
 } from '@mui/material';
-import useSWR from 'swr';
 
 import { useUserContext } from '@/contexts/UserContext';
-import { fetcher } from '@/lib/fetcher';
 import { FetcherError } from '@/lib/errors';
+import { useOrganization, useUpsertOrganization } from '@/lib/hooks/useOrganization';
 import OrganizationForm, { OrganizationFormData } from '@/components/forms/OrganizationForm';
 import {
     mapOrganizationToFormData,
     buildOrganizationUpdatePayload,
 } from '@/components/forms/organizationFormAdapter';
-import type { AdminOrganization } from '@/components/console/types';
 
 export default function MyOrganizationPage() {
     const { enqueueMessage } = useUserContext();
 
-    const fetchOrganization = useCallback(async (url: string) => {
-        try {
-            return await fetcher<AdminOrganization | null>(url);
-        } catch (err) {
-            if (err instanceof FetcherError && err.status === 404) {
-                return null;
-            }
-            throw err;
-        }
-    }, []);
+    const { data, error, isLoading, mutate } = useOrganization();
+    const { trigger: upsertOrganization, isMutating } = useUpsertOrganization();
 
-    const { data, error, isLoading, mutate } = useSWR<AdminOrganization | null>(
-        '/api/profile/org',
-        fetchOrganization
-    );
-
-    const [saving, setSaving] = useState(false);
     const [resetToken, setResetToken] = useState(0);
 
     const hasOrganization = Boolean(data);
@@ -52,12 +36,8 @@ export default function MyOrganizationPage() {
 
     const handleSave = useCallback(async (formData: OrganizationFormData) => {
         try {
-            setSaving(true);
             const payload = buildOrganizationUpdatePayload(formData);
-            await fetcher('/api/profile/org', {
-                method: 'POST',
-                body: JSON.stringify({ organization: payload }),
-            });
+            await upsertOrganization({ organization: payload });
 
             await mutate();
             setResetToken(token => token + 1);
@@ -65,16 +45,14 @@ export default function MyOrganizationPage() {
                 hasOrganization ? 'Organization updated successfully' : 'Organization created successfully',
                 'success'
             );
-        } catch (err) {
+        } catch (err: unknown) {
             if (err instanceof FetcherError) {
                 enqueueMessage(err.message, 'error');
             } else {
                 enqueueMessage('Unable to update organization', 'error');
             }
-        } finally {
-            setSaving(false);
         }
-    }, [enqueueMessage, hasOrganization, mutate]);
+    }, [enqueueMessage, hasOrganization, mutate, upsertOrganization]);
 
     if (isLoading && !data) {
         return (
@@ -111,7 +89,7 @@ export default function MyOrganizationPage() {
                 <OrganizationForm
                     formId="my-organization-form"
                     defaultValues={defaultValues}
-                    disabled={saving}
+                    disabled={isMutating}
                     resetKey={resetToken}
                     onSubmit={handleSave}
                 >
@@ -119,9 +97,9 @@ export default function MyOrganizationPage() {
                         <Button
                             variant="contained"
                             type="submit"
-                            disabled={saving}
+                            disabled={isMutating}
                         >
-                            {saving ? 'Saving…' : hasOrganization ? 'Save' : 'Create'}
+                            {isMutating ? 'Saving…' : hasOrganization ? 'Save' : 'Create'}
                         </Button>
                     </Stack>
                 </OrganizationForm>

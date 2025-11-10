@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
-import useSWR from 'swr';
 import Link from 'next/link';
 
 import {
     Alert,
     Box,
+    Button,
     Card,
     CardContent,
     CardMedia,
@@ -37,38 +37,17 @@ import LaunchIcon from '@mui/icons-material/Launch';
 import BusinessIcon from '@mui/icons-material/Business';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import PersonIcon from '@mui/icons-material/Person';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
-import { fetcher } from '@/lib/fetcher';
-import { FetcherError } from '@/lib/errors';
+import { useOpportunity, OpportunityDTO } from '@/lib/hooks/useOpportunity';
 import ImageViewer from "@/components/media/ImageViewer";
-
-/* ---------------- types matching your backend payload ---------------- */
-
-type RoleDTO = { iri: string; name?: string; description?: string };
-type TaxonomyDTO = { iri: string; name?: string; description?: string };
-type ContactDTO = { iri: string; contactName?: string; email?: string; phone?: string; [k: string]: unknown };
-
-type OpportunityDTO = {
-    iri: string;
-    name?: string;
-    description?: string;
-    partnershipRoles?: RoleDTO[];           // array of role objects
-    primaryContact?: ContactDTO;            // contactName used
-    projectType?: TaxonomyDTO;              // object
-    projectStage?: TaxonomyDTO;             // object
-    land?: any;                             // may contain notes, address[], etc.
-    lands?: any[];                          // optional plural
-    additionalInfo?: {
-        iri?: string;
-        isPosted?: boolean | string;
-        isSearchable?: boolean | string;
-        datePosted?: string | Date;
-        dateModified?: string | Date;
-        images?: string[];
-        files?: string[];
-        primaryImage?: string;
-    };
-};
+import { useCreateChat } from '@/lib/hooks/useChat';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/navigation';
+import { FetcherError } from '@/lib/errors';
+import { useOpportunityFavourites } from '@/contexts/OpportunityFavouritesContext';
 
 /* ---------------- helpers ---------------- */
 
@@ -118,11 +97,79 @@ export default function OpportunityDetailsPage() {
         try { return decodeURIComponent(params.iri); } catch { return params.iri; }
     }, [params.iri]);
 
-    const { data: op, error, isLoading } = useSWR<OpportunityDTO, FetcherError>(
-        `/api/opportunities/${encodeURIComponent(iri)}`,
-        fetcher,
-        { revalidateOnFocus: false }
+    const { opportunity: op, error, isLoading } = useOpportunity(iri);
+    const { trigger: createChat, isMutating: creatingChat } = useCreateChat();
+    const { enqueueSnackbar } = useSnackbar();
+    const router = useRouter();
+    const { isFavourite, toggleFavourite } = useOpportunityFavourites();
+
+    const organization = op?.organization ?? null;
+    const organizationIri = organization?.iri ?? op?.organizationIri ?? null;
+    const organizationName = organization?.name ?? undefined;
+    const opportunityIri = op?.iri ?? null;
+    const favouriteMeta = React.useMemo(
+        () => (
+            opportunityIri
+                ? {
+                    iri: opportunityIri,
+                    name: op?.name ?? undefined,
+                    organizationName,
+                    projectTypeName: op?.projectType?.name ?? undefined,
+                    stageName: op?.projectStage?.name ?? undefined,
+                }
+                : null
+        ),
+        [op?.name, op?.projectStage?.name, op?.projectType?.name, opportunityIri, organizationName],
     );
+
+    const isCurrentFavourite = React.useMemo(
+        () => (opportunityIri ? isFavourite(opportunityIri) : false),
+        [isFavourite, opportunityIri],
+    );
+
+    const [favouritePending, setFavouritePending] = React.useState(false);
+
+    const handleToggleFavourite = React.useCallback(async () => {
+        if (!opportunityIri || !favouriteMeta) return;
+        const wasFavourite = isFavourite(opportunityIri);
+        setFavouritePending(true);
+        try {
+            await toggleFavourite(favouriteMeta);
+            enqueueSnackbar(wasFavourite ? 'Removed from favourites.' : 'Added to favourites.', {
+                variant: 'success',
+            });
+        } catch (error) {
+            const message = error instanceof FetcherError
+                ? error.message
+                : (error as Error)?.message ?? 'Unable to update favourites.';
+            enqueueSnackbar(message, { variant: 'error' });
+        } finally {
+            setFavouritePending(false);
+        }
+    }, [enqueueSnackbar, favouriteMeta, isFavourite, opportunityIri, toggleFavourite]);
+
+    const handleContactOrganization = React.useCallback(async () => {
+        if (!opportunityIri || !organizationIri) {
+            enqueueSnackbar('Organization information unavailable for this opportunity.', { variant: 'warning' });
+            return;
+        }
+
+        try {
+            const result = await createChat({ opportunityIri, organizationIri });
+            const roomId = result?.room?.id;
+            enqueueSnackbar('Conversation opened with the organization.', { variant: 'success' });
+            if (roomId) {
+                router.push(`/console/chat?room=${encodeURIComponent(roomId)}`);
+            } else {
+                router.push('/console/chat');
+            }
+        } catch (err) {
+            const message = err instanceof FetcherError
+                ? err.message
+                : (err as Error)?.message ?? 'Unable to start chat.';
+            enqueueSnackbar(message, { variant: 'error' });
+        }
+    }, [createChat, enqueueSnackbar, opportunityIri, organizationIri, router]);
 
     const ai = (op || {}).additionalInfo ?? {};
     const isPosted = toBool(ai.isPosted);
@@ -207,11 +254,24 @@ export default function OpportunityDetailsPage() {
                     </Stack>
                 </Box>
 
-                <Tooltip title="Edit">
-                    <IconButton component={Link} href={`/console/opportunity/${encodeURIComponent(op.iri)}/edit`} color="primary">
-                        <EditIcon />
-                    </IconButton>
-                </Tooltip>
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <Tooltip title={isCurrentFavourite ? 'Remove from favourites' : 'Save to favourites'}>
+                        <span>
+                            <IconButton
+                                onClick={handleToggleFavourite}
+                                color={isCurrentFavourite ? 'primary' : 'default'}
+                                disabled={!opportunityIri || favouritePending}
+                            >
+                                {isCurrentFavourite ? <BookmarkIcon /> : <BookmarkBorderOutlinedIcon />}
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Edit">
+                        <IconButton component={Link} href={`/console/opportunity/${encodeURIComponent(op.iri)}/edit`} color="primary">
+                            <EditIcon />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
             </Stack>
 
             <Grid container spacing={3}>
@@ -351,6 +411,29 @@ export default function OpportunityDetailsPage() {
                                     </Typography>
                                 </Stack>
                             </Stack>
+                        </CardContent>
+                    </Card>
+
+                    <Card sx={{ borderRadius: 3, mb: 3 }}>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom>Contact Organization</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Start a chat with the organization and keep this conversation linked to the opportunity.
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                startIcon={<ChatOutlinedIcon />}
+                                onClick={handleContactOrganization}
+                                disabled={creatingChat || !organizationIri}
+                                fullWidth
+                            >
+                                Message {organizationName ?? 'organization'}
+                            </Button>
+                            {!organizationIri && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                                    Organization details are unavailable for this opportunity.
+                                </Typography>
+                            )}
                         </CardContent>
                     </Card>
 

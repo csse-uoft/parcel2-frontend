@@ -29,6 +29,8 @@ import CogOutline from 'mdi-material-ui/CogOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import ServerNetworkOutline from 'mdi-material-ui/ServerNetworkOutline';
 
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+
 /** Works with both MUI and MDI icon components */
 export type IconType = ElementType<any> | SvgIconComponent;
 
@@ -90,7 +92,7 @@ export const navConfig: NavConfig = [
             {
                 label: 'View Favourites',
                 href: '/console/opportunity/favourites',
-                icon: StarOutline
+                icon: BookmarkIcon
             }
         ]
     },
@@ -117,15 +119,20 @@ export const navConfig: NavConfig = [
         icon: EmailOutline,
         children: [
             {
-                label: 'Sent Messages',
-                href: '/console/notification/sent',
-                icon: EmailArrowRightOutline
+                label: 'Chat',
+                href: '/console/chat',
+                icon: EmailOutline,
             },
-            {
-                label: 'Received Messages',
-                href: '/console/notification/received',
-                icon: EmailArrowLeftOutline
-            }
+            // {
+            //     label: 'Sent Messages',
+            //     href: '/console/notification/sent',
+            //     icon: EmailArrowRightOutline
+            // },
+            // {
+            //     label: 'Received Messages',
+            //     href: '/console/notification/received',
+            //     icon: EmailArrowLeftOutline
+            // }
         ]
     },
     {

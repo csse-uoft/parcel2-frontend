@@ -5,6 +5,8 @@ import { FetcherError } from "@/lib/errors";
 
 type Credentials = { username: string; password: string };
 type RegisterPayload = Credentials & { email: string };
+type ForgotPasswordPayload = { email: string };
+type ResetPasswordPayload = { token: string; password: string };
 
 export function useLogin() {
     const { mutate: mutateUser } = useUser();
@@ -34,5 +36,19 @@ export function useLogout() {
         {
             onSuccess: () => mutateUser(undefined, { revalidate: false }),
         },
+    );
+}
+
+export function useForgotPassword() {
+    return useSWRMutation<void, FetcherError, string, ForgotPasswordPayload>(
+        '/api/auth/password/forgot',
+        postJSON,
+    );
+}
+
+export function useCompletePasswordReset() {
+    return useSWRMutation<void, FetcherError, string, ResetPasswordPayload>(
+        '/api/auth/password/reset',
+        postJSON,
     );
 }

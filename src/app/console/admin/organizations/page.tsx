@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import useSWR from 'swr';
 import {
     Alert,
     Box,
@@ -29,6 +28,8 @@ import { CreateOrganizationDialog } from '@/components/console/CreateOrganizatio
 import { OrganizationFormData } from '@/components/forms/OrganizationForm';
 import { buildOrganizationUpdatePayload } from '@/components/forms/organizationFormAdapter';
 import { pruneEmpty } from '@/lib/utils';
+import { useAdminOrganizations, useManagedOrganization } from '@/lib/hooks/useOrganizations';
+import { useScopedConsoleUsers } from '@/lib/hooks/useConsoleUsers';
 
 export default function ManageOrganizationsPage() {
     const { roles, enqueueMessage, isLoading } = useUserContext();
@@ -40,35 +41,23 @@ export default function ManageOrganizationsPage() {
         error: adminOrgError,
         isLoading: isAdminOrgLoading,
         mutate: mutateAdminOrganizations,
-    } = useSWR<AdminOrganization[]>(
-        isAdmin ? '/api/admin/organizations' : null,
-        endpoint => fetcher<AdminOrganization[]>(endpoint),
-        { keepPreviousData: true },
-    );
+    } = useAdminOrganizations(isAdmin);
 
     const {
         data: managedOrganization,
         error: managedOrgError,
         isLoading: isManagedOrgLoading,
         mutate: mutateManagedOrganization,
-    } = useSWR<AdminOrganization | null>(
-        !isAdmin && isOrgAdmin ? '/api/org-admin/organization' : null,
-        endpoint => fetcher<AdminOrganization>(endpoint),
-        { keepPreviousData: true },
-    );
+    } = useManagedOrganization(!isAdmin && isOrgAdmin);
 
     const {
         data: users,
         error: userError,
         isLoading: isUsersLoading,
         mutate: mutateUsers,
-    } = useSWR<ConsoleUser[]>(
-        isAdmin ? '/api/admin/users' : isOrgAdmin ? '/api/org-admin/users' : null,
-        endpoint => fetcher<ConsoleUser[]>(endpoint),
-        { keepPreviousData: true },
-    );
+    } = useScopedConsoleUsers(isAdmin ? 'admin' : isOrgAdmin ? 'org_admin' : null);
 
-    const organizations = useMemo(() => {
+    const organizations: AdminOrganization[] = useMemo(() => {
         if (isAdmin) return adminOrganizations ?? [];
         if (isOrgAdmin) return managedOrganization ? [managedOrganization] : [];
         return [];
@@ -96,9 +85,9 @@ export default function ManageOrganizationsPage() {
     const [createDialogResetKey, setCreateDialogResetKey] = useState(0);
     const [isCreatingOrg, setIsCreatingOrg] = useState(false);
 
-    const orgUsers = useMemo(() => {
+    const orgUsers: ConsoleUser[] = useMemo(() => {
         if (!selectedOrg || !users) return [];
-        return users.filter(user => user.organizationIRI === selectedOrg.iri);
+        return users.filter((user: ConsoleUser) => user.organizationIRI === selectedOrg.iri);
     }, [selectedOrg, users]);
 
     const handleOpenOrg = (org: AdminOrganization) => {
@@ -307,7 +296,7 @@ export default function ManageOrganizationsPage() {
                         </TableHead>
                         <TableBody>
                             {organizations.map(org => {
-                                const memberCount = users?.filter(user => user.organizationIRI === org.iri).length ?? 0;
+                                const memberCount = users?.filter((user: ConsoleUser) => user.organizationIRI === org.iri).length ?? 0;
                                 return (
                                     <TableRow key={org.iri} hover>
                                         <TableCell>{org.name ?? '—'}</TableCell>

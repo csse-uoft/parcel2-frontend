@@ -1,8 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import useSWR from 'swr';
-import useSWRMutation from 'swr/mutation';
 import {
     Box,
     Paper,
@@ -32,8 +30,8 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 
-import { postJSON } from '@/lib/fetcher';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
+import { useOpportunitySearch } from '@/lib/hooks/useOpportunitySearch';
 import OpportunitySearchFilters, {
     FilterState,
     SortBy,
@@ -43,7 +41,7 @@ import OpportunitySearchFilters, {
 import MapView from '@/components/console/opportunity/search/MapView';
 import ResultsList from '@/components/console/opportunity/search/ResultsList';
 import QuickViewDialog from '@/components/console/opportunity/search/QuickViewDialog';
-import { LatLng, SearchHit, SearchResponse } from '@/components/console/opportunity/search/types';
+import { LatLng, SearchHit } from '@/components/console/opportunity/search/types';
 import { useDebounced } from '@/components/console/opportunity/search/utils';
 
 export default function OpportunitySearchPage() {
@@ -98,15 +96,13 @@ export default function OpportunitySearchPage() {
     );
 
     // Fetch
-    const { data, isLoading, error } = useSWR<SearchResponse>(
-        ['/api/opportunities/search', debouncedBody],
-        ([url, body]) => postJSON<SearchResponse>(url, { arg: body }),
-        { revalidateOnFocus: false }
-    );
-    const { trigger: refresh, isMutating: refreshing } = useSWRMutation(
-        '/api/opportunities/search',
-        (url: string, { arg }: { arg: typeof debouncedBody }) => postJSON<SearchResponse>(url, { arg })
-    );
+    const {
+        data,
+        error,
+        isLoading,
+        refresh,
+        refreshing,
+    } = useOpportunitySearch(debouncedBody);
 
     // Filter to map bounds (client-side)
     const rawItems = data?.items ?? [];
