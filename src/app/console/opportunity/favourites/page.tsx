@@ -49,7 +49,7 @@ export default function OpportunityFavouritesPage() {
                         Saved opportunities
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Quickly revisit the opportunities you've saved while browsing.
+                        Quickly revisit the opportunities you&apos;ve saved while browsing.
                     </Typography>
                 </Box>
                 <Button component={Link} href="/console/opportunity/search" variant="outlined">
@@ -75,10 +75,10 @@ export default function OpportunityFavouritesPage() {
             ) : !hasFavourites ? (
                 <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                        You haven't saved any opportunities yet.
+                        You haven&apos;t saved any opportunities yet.
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Browse the opportunities and choose "Save to favourites" on any listing to store it here.
+                        Browse the opportunities and choose &quot;Save to favourites&quot; on any listing to store it here.
                     </Typography>
                     <Button component={Link} href="/console/opportunity/search" variant="contained">
                         Browse opportunities

@@ -105,7 +105,7 @@ export default function OpportunitySearchPage() {
     } = useOpportunitySearch(debouncedBody);
 
     // Filter to map bounds (client-side)
-    const rawItems = data?.items ?? [];
+    const rawItems = React.useMemo(() => data?.items ?? [], [data?.items]);
     const items = React.useMemo(() => {
         if (!limitToMap || !mapBounds) return rawItems;
         return rawItems.filter((it) => {

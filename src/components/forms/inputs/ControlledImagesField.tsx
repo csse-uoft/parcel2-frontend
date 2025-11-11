@@ -103,29 +103,6 @@ export default function ControlledImageUploadDropzone({
         [getValues, setValue, nameImages, namePrimary]
     );
 
-    const onDrop = React.useCallback((accepted: File[]) => {
-        if (!accepted?.length) return;
-        const entries: UploadEntry[] = accepted.map((f) => ({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            file: f,
-            name: f.name,
-            size: f.size,
-            progress: 0,
-            status: 'uploading',
-        }));
-        setQueue((q) => [...q, ...entries]);
-        entries.forEach((e) => uploadOne(e)); // uses latest addUrls via deps
-    }, []); // okay – uploadOne is stable via its deps below
-
-    const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
-        onDrop,
-        multiple: true,
-        accept: { 'image/*': [] },
-        maxFiles,
-        maxSize,
-        disabled,
-    });
-
     const uploadOne = React.useCallback(
         (entry: UploadEntry) => {
             const xhr = new XMLHttpRequest();
@@ -183,8 +160,31 @@ export default function ControlledImageUploadDropzone({
             fd.append(formFieldName, entry.file, entry.name);
             xhr.send(fd);
         },
-        [baseUrl, endpoint, headers, defaultParse, parseResponse, addUrls]
+    [baseUrl, endpoint, headers, defaultParse, parseResponse, addUrls, formFieldName]
     );
+
+    const onDrop = React.useCallback((accepted: File[]) => {
+        if (!accepted?.length) return;
+        const entries: UploadEntry[] = accepted.map((f) => ({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            file: f,
+            name: f.name,
+            size: f.size,
+            progress: 0,
+            status: 'uploading',
+        }));
+        setQueue((q) => [...q, ...entries]);
+        entries.forEach((e) => uploadOne(e)); // uses latest addUrls via deps
+    }, [uploadOne]);
+
+    const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+        onDrop,
+        multiple: true,
+        accept: { 'image/*': [] },
+        maxFiles,
+        maxSize,
+        disabled,
+    });
 
     const removeImageAt = (idx: number) => {
         const current: string[] = (getValues(nameImages) as string[]) ?? [];
@@ -295,6 +295,7 @@ export default function ControlledImageUploadDropzone({
                                             aspectRatio: '1 / 1',
                                         }}
                                     >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={baseUrl + url}
                                             alt={`img-${idx}`}

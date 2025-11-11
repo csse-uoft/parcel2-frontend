@@ -84,29 +84,6 @@ export default function ControlledUploadDropzone({
         [getValues, setValue, name]
     );
 
-    const onDrop = React.useCallback((accepted: File[]) => {
-        if (!accepted?.length) return;
-        const entries: UploadEntry[] = accepted.map((f) => ({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            file: f,
-            name: f.name,
-            size: f.size,
-            progress: 0,
-            status: 'uploading',
-        }));
-        setQueue((q) => [...q, ...entries]);
-        entries.forEach((e) => uploadOne(e));
-    }, []); // uploadOne is stable via deps
-
-    const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
-        onDrop,
-        multiple,
-        accept,
-        maxFiles,
-        maxSize,
-        disabled,
-    });
-
     const parse = React.useCallback<ParseResponse>((xhr) => {
         try {
             const json = JSON.parse(xhr.responseText);
@@ -186,8 +163,31 @@ export default function ControlledUploadDropzone({
             fd.append(formFieldName, entry.file, entry.name);
             xhr.send(fd);
         },
-        [baseUrl, endpoint, headers, parseResponse, parse, addUrls]
+        [baseUrl, endpoint, headers, parseResponse, parse, addUrls, formFieldName]
     );
+
+    const onDrop = React.useCallback((accepted: File[]) => {
+        if (!accepted?.length) return;
+        const entries: UploadEntry[] = accepted.map((f) => ({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            file: f,
+            name: f.name,
+            size: f.size,
+            progress: 0,
+            status: 'uploading',
+        }));
+        setQueue((q) => [...q, ...entries]);
+        entries.forEach((e) => uploadOne(e));
+    }, [uploadOne]);
+
+    const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+        onDrop,
+        multiple,
+        accept,
+        maxFiles,
+        maxSize,
+        disabled,
+    });
 
     const cancelUpload = (id: string) => {
         setQueue((q) => {

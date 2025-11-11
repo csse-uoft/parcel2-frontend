@@ -52,7 +52,7 @@ export function OpportunityFavouritesProvider({ children }: ProviderProps) {
         { revalidateOnFocus: false },
     );
 
-    const favourites = data?.favourites ?? [];
+    const favourites = useMemo(() => data?.favourites ?? [], [data?.favourites]);
 
     const isFavourite = useCallback(
         (iri: string) => favourites.some(item => item.iri === iri),

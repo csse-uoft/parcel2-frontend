@@ -131,21 +131,6 @@ export default function ImageViewer({
     }, [cleaned.length]);
 
     // Keyboard
-    React.useEffect(() => {
-        if (!open) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
-            else if (e.key === 'Escape') { e.preventDefault(); onClose(); }
-            else if (e.key === '+') { e.preventDefault(); zoomAtCenter(1.2); }
-            else if (e.key === '-') { e.preventDefault(); zoomAtCenter(1 / 1.2); }
-            else if (e.key.toLowerCase() === 'f') { e.preventDefault(); doFit(); }
-            else if (e.key === '0') { e.preventDefault(); setScale(1); setTx(0); setTy(0); }
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [open, goPrev, goNext, onClose]);
-
     // Helpers to zoom around a point p (in stage coords with origin at center)
     const zoomAroundPoint = React.useCallback((factor: number, px: number, py: number) => {
         setScale(prev => {
@@ -183,6 +168,21 @@ export default function ImageViewer({
 
     const rotateLeft = React.useCallback(() => setRot(r => (r - 90 + 360) % 360), []);
     const rotateRight = React.useCallback(() => setRot(r => (r + 90) % 360), []);
+
+    React.useEffect(() => {
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+            else if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+            else if (e.key === '+') { e.preventDefault(); zoomAtCenter(1.2); }
+            else if (e.key === '-') { e.preventDefault(); zoomAtCenter(1 / 1.2); }
+            else if (e.key.toLowerCase() === 'f') { e.preventDefault(); doFit(); }
+            else if (e.key === '0') { e.preventDefault(); setScale(1); setTx(0); setTy(0); }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [open, goPrev, goNext, onClose, zoomAtCenter, doFit]);
 
     // Wheel zoom handler (cursor-centered)
     const onWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {

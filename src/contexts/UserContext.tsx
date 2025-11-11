@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, {
     createContext,
     useContext,
@@ -6,6 +6,7 @@ import React, {
     useEffect,
     ReactNode,
     useRef,
+    useCallback,
 } from 'react';
 import { useSnackbar } from 'notistack';
 import { useUser } from "@/lib/hooks/useUser";
@@ -131,7 +132,7 @@ interface ProviderProps {
 
 
 export const UserProvider = ({ children }: ProviderProps) => {
-    const { user, mutate, isLoading } = useUser();
+    const { user, isLoading } = useUser();
     const { trigger: userLogout } = useLogout();
     const router = useRouter();
     const pathname = usePathname();
@@ -139,18 +140,35 @@ export const UserProvider = ({ children }: ProviderProps) => {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [state, dispatch] = useReducer(reducer, defaultState);
 
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const logout = useCallback(async () => {
+        await userLogout();
+        router.push('/login');
+    }, [router, userLogout]);
 
     /** schedules auto-logout X seconds before exp */
-    const scheduleExpiry = (exp?: number) => {
+    const scheduleExpiry = useCallback((exp?: number) => {
         if (timerRef.current) clearTimeout(timerRef.current);
         if (!exp) return;
 
-        const ms = exp * 1000 - 60_000; // 1 min early, never < 0
+        const ms = exp * 1000 - 60_000; // 1 min early
         if (ms > 0) {
-            timerRef.current = setTimeout(() => logout(), ms);
+            timerRef.current = setTimeout(() => {
+                void logout();
+            }, ms);
         }
-    };
+    }, [logout]);
+
+    useEffect(() => {
+        externalLogout = logout;
+        return () => {
+            if (externalLogout === logout) {
+                externalLogout = () => null;
+            }
+        };
+    }, [logout]);
+
     useEffect(() => {
         console.log(`UserContext: user changed to ${user?.email} (exp: ${user?.exp})`);
         if (user && !isLoading && user.username !== 'guest') {
@@ -161,7 +179,7 @@ export const UserProvider = ({ children }: ProviderProps) => {
             if (timerRef.current) clearTimeout(timerRef.current);
         }
 
-    }, [user?.username, user?.exp]);
+    }, [user, isLoading, scheduleExpiry]);
 
     // if the user is not registered, redirect to the registration page
     useEffect(() => {
@@ -172,49 +190,39 @@ export const UserProvider = ({ children }: ProviderProps) => {
         if (user.username !== 'guest' && !user.isRegistrationComplete && pathname !== '/register/setup') {
             router.push('/register/setup');
         }
-    }, [user?.username, user?.isRegistrationComplete, pathname, isLoading, router]);
-
-
-    const logout = async () => {
-        await userLogout();
-        router.push('/login');
-    };
-
-    /* expose for fetcher.ts */
-    externalLogout = logout;
+    }, [user, isLoading, pathname, router]);
 
     /* wrap enqueueSnackbar so the rest of the app never sees notistack */
-    const enqueueMessage: UserContextValue['enqueueMessage'] = (
-        message,
-        type = 'info',
-        options = {},
-    ) => {
-        dispatch({ type: 'INCREMENT_MESSAGES' });
+    const enqueueMessage = useCallback<UserContextValue['enqueueMessage']>(
+        (message, type = 'info', options = {}) => {
+            dispatch({ type: 'INCREMENT_MESSAGES' });
 
-        const key = enqueueSnackbar(message, {
-            variant: type,
-            action: options.buttonText
-                ? () => (
-                    <button
-                        onClick={() => {
-                            options.buttonOnClick?.();
-                            closeSnackbar(key);
-                        }}
-                        style={{ color: 'inherit', background: 'none', border: 'none' }}
-                    >
-                        {options.buttonText}
-                    </button>
-                )
-                : undefined,
-        });
+            const key = enqueueSnackbar(message, {
+                variant: type,
+                action: options.buttonText
+                    ? () => (
+                        <button
+                            onClick={() => {
+                                options.buttonOnClick?.();
+                                closeSnackbar(key);
+                            }}
+                            style={{ color: 'inherit', background: 'none', border: 'none' }}
+                        >
+                            {options.buttonText}
+                        </button>
+                    )
+                    : undefined,
+            });
 
-        /* persist message text if requested */
-        if (options.persist) {
-            const pending = JSON.parse(localStorage.getItem('pendingSnackbars') ?? '[]') as string[];
-            pending.push(message);
-            localStorage.setItem('pendingSnackbars', JSON.stringify(pending));
-        }
-    };
+            /* persist message text if requested */
+            if (options.persist) {
+                const pending = JSON.parse(localStorage.getItem('pendingSnackbars') ?? '[]') as string[];
+                pending.push(message);
+                localStorage.setItem('pendingSnackbars', JSON.stringify(pending));
+            }
+        },
+        [closeSnackbar, enqueueSnackbar]
+    );
 
     /* ---- fill reducer helpers with dispatch wrappers ---- */
     const contextValue: UserContextValue = {
@@ -233,12 +241,18 @@ export const UserProvider = ({ children }: ProviderProps) => {
         const pending: string[] = JSON.parse(localStorage.getItem('pendingSnackbars') ?? '[]');
         pending.forEach(txt => enqueueMessage(txt, 'info'));
         localStorage.removeItem('pendingSnackbars');
-    }, []);
+    }, [enqueueMessage]);
 
     /* ---- persist every change ---- */
     useEffect(() => {
         saveToStorage(state);
     }, [state]);
+
+    useEffect(() => () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+    }, []);
 
     return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };

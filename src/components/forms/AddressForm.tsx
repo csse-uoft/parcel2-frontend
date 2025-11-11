@@ -599,7 +599,7 @@ export default function AddressForm({ baseName, disabled }: AddressFormProps) {
 
                     {!hasAddress && (
                         <Alert severity="info">
-                            No address has been provided yet. Use "Add address" to search or enter details manually.
+                            No address has been provided yet. Use &quot;Add address&quot; to search or enter details manually.
                         </Alert>
                     )}
 
@@ -609,7 +609,7 @@ export default function AddressForm({ baseName, disabled }: AddressFormProps) {
                                 <Typography variant="body1">{summaryLine}</Typography>
                             ) : (
                                 <Typography variant="body1" color="text.secondary">
-                                    Address captured. Use "Edit" to view details.
+                                    Address captured. Use &quot;Edit&quot; to view details.
                                 </Typography>
                             )}
                             <Button
