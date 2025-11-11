@@ -76,7 +76,7 @@ export default function SetupProfileForm({
                     <Typography variant="h6" gutterBottom>
                         Primary Address
                     </Typography>
-                    <AddressForm baseName="primaryAddress" simplified disabled={disabled}/>
+                    <AddressForm baseName="primaryAddress" disabled={disabled}/>
                 </Grid>
 
                 {showSubmitButton && (
