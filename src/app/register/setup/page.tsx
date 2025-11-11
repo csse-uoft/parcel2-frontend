@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Container,
     Typography,
@@ -12,19 +12,44 @@ import {
 import { useRouter } from 'next/navigation';
 
 import Header from '@/components/header/Header';
-import { useUserProfile } from '@/lib/hooks/useUser';
+import { useUser, useUserProfile } from '@/lib/hooks/useUser';
 import SetupProfileForm, {
     SetupProfileFormData,
 } from '@/components/forms/SetupForm';
 import OrganizationForm from "@/components/forms/OrganizationForm";
+import { useUserContext } from '@/contexts/UserContext';
 
 export default function InitialSetupPage() {
     const router = useRouter();
     const { profile, isLoading, isError, mutate } = useUserProfile();
+    const { mutate: mutateUser } = useUser();
+    const [isRedirecting, setIsRedirecting] = useState(false);
+    const { enqueueMessage } = useUserContext();
+
+    useEffect(() => {
+        if (isLoading || isError || isRedirecting) {
+            return;
+        }
+
+    const profileFullName = profile?.person?.fullName;
+    const hasCompletedProfile = Boolean(profile?.isRegistrationComplete) || Boolean(typeof profileFullName === 'string' && profileFullName.trim().length > 0);
+        if (hasCompletedProfile) {
+            setIsRedirecting(true);
+            router.replace('/console/opportunity/search');
+        }
+    }, [isLoading, isError, profile, router, isRedirecting]);
 
     /* ------------------------------------------------------------ */
     /*  Loading & error states                                      */
     /* ------------------------------------------------------------ */
+    if (isRedirecting) {
+        return (
+            <Container sx={{ py: 4 }}>
+                <CircularProgress/>
+            </Container>
+        );
+    }
+
     if (isLoading) {
         return (
             <Container sx={{ py: 4 }}>
@@ -46,17 +71,28 @@ export default function InitialSetupPage() {
     /*  Submit handler – called by SetupProfileForm                 */
     /* ------------------------------------------------------------ */
     const handleSave = async (data: SetupProfileFormData) => {
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/profile/init`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                person: data,
-            }),
-        });
+        setIsRedirecting(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/profile/init`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    person: data,
+                }),
+            });
 
-        await mutate();                // refresh SWR cache
-        router.push('/console/opportunity/search');
+            if (!response.ok) {
+                throw new Error('Failed to save profile');
+            }
+
+            await Promise.all([mutate(), mutateUser()]);
+            router.replace('/console/opportunity/search');
+        } catch (error) {
+            console.error('Failed to initialize profile', error);
+            enqueueMessage('Unable to save profile. Please try again.', 'error');
+            setIsRedirecting(false);
+        }
     };
 
 

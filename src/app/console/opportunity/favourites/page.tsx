@@ -78,7 +78,7 @@ export default function OpportunityFavouritesPage() {
                         You haven't saved any opportunities yet.
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Browse the marketplace and choose "Save to favourites" on any listing to store it here.
+                        Browse the opportunities and choose "Save to favourites" on any listing to store it here.
                     </Typography>
                     <Button component={Link} href="/console/opportunity/search" variant="contained">
                         Browse opportunities

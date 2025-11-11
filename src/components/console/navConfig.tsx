@@ -90,9 +90,31 @@ export const navConfig: NavConfig = [
                 icon: ClipboardTextOutline
             },
             {
+                label: 'Call for Proposals',
+                href: '/console/call-for-proposals',
+                icon: ClipboardTextOutline
+            },
+            {
                 label: 'View Favourites',
                 href: '/console/opportunity/favourites',
                 icon: BookmarkIcon
+            }
+        ]
+    },
+    {
+        type: 'title',
+        label: 'My Applications',
+        icon: TextBoxMultipleOutline,
+        children: [
+            {
+                label: 'My Applications',
+                href: '/console/applications',
+                icon: ClipboardTextOutline
+            },
+            {
+                label: 'Start Application',
+                href: '/console/applications/new',
+                icon: AddOutlined
             }
         ]
     },

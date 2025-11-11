@@ -272,7 +272,7 @@ export default function InviteUsersPage() {
             <Alert severity="info">
                 {result.temporaryPassword ? (
                     <>
-                        Temporary password: <strong>{result.temporaryPassword}</strong>.
+                        Temporary password: <strong>{result.temporaryPassword}</strong>
                     </>
                 ) : (
                     <>{result.message ?? 'Invitation created.'}</>

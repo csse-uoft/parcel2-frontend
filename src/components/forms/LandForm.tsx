@@ -99,7 +99,7 @@ export default function LandForm({
             </Grid>
 
             {/* Addresses (array, min 1) */}
-            <ControlledAddressesField name={path('addresses')} disabled={disabled} simplified title={""} />
+            <ControlledAddressesField name={path('addresses')} disabled={disabled} title={""} />
 
             {/* Land Uses */}
 

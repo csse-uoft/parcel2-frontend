@@ -63,7 +63,7 @@ function PartnerCard({
                 {/* Organization dropdown (Parcel2) */}
                 <Grid size={{ xs: 12, sm: 8 }}>
                     <Controller
-                        name={`${baseName}.organizationId`}
+                        name={`${baseName}.organization`}
                         control={control}
                         render={({ field, fieldState }) => (
                             <Autocomplete
@@ -194,7 +194,7 @@ export default function ControlledPartnersField({
                 variant="outlined"
                 startIcon={<Add/>}
                 onClick={() =>
-                    append({ organizationId: '', organizationName: '', roles: [] })
+                    append({ organization: '', organizationName: '', roles: [] })
                 }
                 disabled={disabled}
             >

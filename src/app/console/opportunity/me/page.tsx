@@ -28,37 +28,15 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { useMyOpportunities } from "@/lib/hooks/useOpportunities";
+import type { OpportunityDTO } from "@/lib/opportunities/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE ?? "";
 
-// Types adapted to OwlClass.toJSON() shape returned by your backend
-interface OpportunityAdditionalInfoDTO {
-    images?: string[];
-    files?: string[];
-    primaryImage?: string;
-    isPosted?: boolean | string;
-    isSearchable?: boolean | string;
-    datePosted?: string;
-    dateModified?: string;
-}
-
-interface OpportunityDTO {
-    iri: string;
-    name?: string;
-    description?: string;
-    additionalInfo?: OpportunityAdditionalInfoDTO;
-    partners?: unknown[];
-    projectType?: unknown;
-    projectStage?: unknown;
-    partnershipRoles?: unknown[];
-    land?: unknown;
-    lands?: unknown[];
-}
-
 export default function MyOpportunitiesPage() {
-    const [items, setItems] = React.useState<OpportunityDTO[]>([]);
-    const [isLoading, setIsLoading] = React.useState<boolean>(true);
-    const [errorMessage, setErrorMessage] = React.useState<string>("");
+    const { data, error, isLoading, mutate } = useMyOpportunities();
+    const items = React.useMemo(() => Array.isArray(data) ? data : [], [data]);
+    const errorMessage = error?.message ?? "";
 
     const [page, setPage] = React.useState<number>(0); // zero-based for TablePagination
     const [rowsPerPage, setRowsPerPage] = React.useState<number>(12);
@@ -73,36 +51,6 @@ export default function MyOpportunitiesPage() {
         const start = page * rowsPerPage;
         return items.slice(start, start + rowsPerPage);
     }, [items, page, rowsPerPage]);
-
-    React.useEffect(() => {
-        let isMounted = true;
-        setIsLoading(true);
-        fetch(`${API_BASE_URL}/api/opportunities/me`, {
-            method: "GET",
-            credentials: "include", // important for cookie-based session
-        })
-            .then(async (res) => {
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(text || `Request failed with ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((data: OpportunityDTO[]) => {
-                if (!isMounted) return;
-                setItems(Array.isArray(data) ? data : []);
-                setErrorMessage("");
-            })
-            .catch((err: unknown) => {
-                if (!isMounted) return;
-                setErrorMessage(err instanceof Error ? err.message : String(err));
-            })
-            .finally(() => {
-                if (isMounted) setIsLoading(false);
-            });
-
-        return () => { isMounted = false; };
-    }, []);
 
     function handleChangePage(_evt: unknown, newPage: number) {
         setPage(newPage);
@@ -129,8 +77,8 @@ export default function MyOpportunitiesPage() {
                 const text = await resp.text();
                 throw new Error(text || `Delete failed with ${resp.status}`);
             }
-            // Remove from local list
-            setItems(prev => prev.filter(x => x.iri !== iri));
+            // Optimistically remove the deleted opportunity
+            await mutate(prev => Array.isArray(prev) ? prev.filter(x => x.iri !== iri) : prev, { revalidate: false });
             setSnackbar({ open: true, severity: "success", message: "Opportunity deleted." });
         } catch (err) {
             setSnackbar({ open: true, severity: "error", message: err instanceof Error ? err.message : String(err) });
@@ -144,10 +92,10 @@ export default function MyOpportunitiesPage() {
         return ai.primaryImage || (ai.images && ai.images.length > 0 ? ai.images[0] : undefined);
     }
 
-    function formatDate(s?: string) {
-        if (!s) return "";
-        const d = new Date(s);
-        if (Number.isNaN(d.getTime())) return s;
+    function formatDate(value?: string | Date) {
+        if (!value) return "";
+        const d = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(d.getTime())) return typeof value === "string" ? value : value.toISOString();
         return d.toLocaleString();
     }
 

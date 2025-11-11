@@ -12,6 +12,7 @@ import {
     CardContent,
     CardMedia,
     Chip,
+    CircularProgress,
     Container,
     Divider,
     Grid,
@@ -42,7 +43,11 @@ import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlin
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 import { useOpportunity, OpportunityDTO } from '@/lib/hooks/useOpportunity';
+import { useOpportunityCallForProposals } from '@/lib/hooks/useCallForProposals';
+import type { CallForProposalDTO } from '@/lib/callForProposals/types';
+import { CALL_FOR_PROPOSAL_STATUSES, APPLICATION_STATUSES, ACCEPTANCE_STATUSES, PROPOSAL_STATUSES } from '@/lib/callForProposals/constants';
 import ImageViewer from "@/components/media/ImageViewer";
+import EmbeddedMap from '@/components/maps/EmbeddedMap';
 import { useCreateChat } from '@/lib/hooks/useChat';
 import { useSnackbar } from 'notistack';
 import { useRouter } from 'next/navigation';
@@ -73,17 +78,34 @@ function fmtDate(v?: string | Date) {
     return d.toLocaleString();
 }
 
+function formatShortDate(v?: string | Date) {
+    if (!v) return '';
+    const d = typeof v === 'string' ? new Date(v) : v;
+    const t = d?.getTime?.();
+    if (!t || Number.isNaN(t)) return String(v);
+    return d.toLocaleDateString();
+}
+
+function statusLabel(options: { value: string; label: string }[], value?: string) {
+    if (!value) return '';
+    const match = options.find((item) => item.value === value);
+    return match?.label ?? value;
+}
+
 /** Try to get a single lat/lng from land(s).address[] */
 function extractLatLng(op: OpportunityDTO): { lat?: number; lng?: number } {
     const lands: any[] = Array.isArray(op.land) ? op.land : (op.lands ?? (op.land ? [op.land] : []));
     for (const land of lands) {
-        const addresses: any[] = Array.isArray(land?.address) ? land.address : [];
-        for (const addr of addresses) {
-            const latS = addr?.latitude ?? addr?.lat ?? addr?.geoLat;
-            const lngS = addr?.longitude ?? addr?.lng ?? addr?.geoLng;
-            const lat = typeof latS === 'number' ? latS : parseFloat(String(latS ?? ''));
-            const lng = typeof lngS === 'number' ? lngS : parseFloat(String(lngS ?? ''));
-            if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+        const addressList: any[] = Array.isArray(land?.addresses)
+            ? land.addresses
+            : Array.isArray(land?.address)
+                ? land.address
+                : [];
+        for (const addr of addressList) {
+            const { lat, lng } = extractLatLngFromAddress(addr);
+            if (lat != null && lng != null) {
+                return { lat, lng };
+            }
         }
     }
     return {};
@@ -98,6 +120,7 @@ export default function OpportunityDetailsPage() {
     }, [params.iri]);
 
     const { opportunity: op, error, isLoading } = useOpportunity(iri);
+    const { data: callForProposalsData, isLoading: isLoadingCallForProposals } = useOpportunityCallForProposals(iri);
     const { trigger: createChat, isMutating: creatingChat } = useCreateChat();
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
@@ -128,6 +151,18 @@ export default function OpportunityDetailsPage() {
     );
 
     const [favouritePending, setFavouritePending] = React.useState(false);
+
+    const callForProposals = React.useMemo<CallForProposalDTO[]>(
+        () => Array.isArray(callForProposalsData) ? callForProposalsData : [],
+        [callForProposalsData],
+    );
+    const showManageCallsLink = React.useMemo(
+        () => callForProposals.some((item) => item?.isOwner),
+        [callForProposals],
+    );
+    const goToManageCalls = React.useCallback(() => {
+        router.push('/console/call-for-proposals');
+    }, [router]);
 
     const handleToggleFavourite = React.useCallback(async () => {
         if (!opportunityIri || !favouriteMeta) return;
@@ -213,6 +248,13 @@ export default function OpportunityDetailsPage() {
     if (!op) return null;
 
     const coords = extractLatLng(op);
+    const rawLat = typeof coords.lat === 'number' ? coords.lat : null;
+    const rawLng = typeof coords.lng === 'number' ? coords.lng : null;
+    const latLng = rawLat !== null && rawLng !== null ? { lat: rawLat, lng: rawLng } : null;
+    const coordinatesText = latLng
+        ? `Coordinates: ${latLng.lat.toFixed(6)}, ${latLng.lng.toFixed(6)}`
+        : 'No coordinates available';
+    const mapsSearchUrl = latLng ? `https://www.google.com/maps/search/?api=1&query=${latLng.lat},${latLng.lng}` : null;
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -266,11 +308,19 @@ export default function OpportunityDetailsPage() {
                             </IconButton>
                         </span>
                     </Tooltip>
-                    <Tooltip title="Edit">
-                        <IconButton component={Link} href={`/console/opportunity/${encodeURIComponent(op.iri)}/edit`} color="primary">
-                            <EditIcon />
-                        </IconButton>
-                    </Tooltip>
+                    {op.isOwner && (
+                        <Tooltip title="Edit opportunity">
+                            <span>
+                                <IconButton
+                                    component={Link}
+                                    href={`/console/opportunity/${encodeURIComponent(op.iri)}/edit`}
+                                    color="primary"
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    )}
                 </Stack>
             </Stack>
 
@@ -290,6 +340,79 @@ export default function OpportunityDetailsPage() {
                         ) : (
                             <Box sx={{ height: 320, bgcolor: 'action.hover' }} />
                         )}
+                    </Card>
+
+                    <Card sx={{ borderRadius: 3, mb: 3 }}>
+                        <CardContent>
+                            <Stack spacing={2}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                    <Typography variant="h6">Call for Proposals</Typography>
+                                    {showManageCallsLink && (
+                                        <Button variant="outlined" size="small" onClick={goToManageCalls}>
+                                            Manage Calls
+                                        </Button>
+                                    )}
+                                </Stack>
+                                {isLoadingCallForProposals ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                        <CircularProgress size={24} />
+                                    </Box>
+                                ) : callForProposals.length === 0 ? (
+                                    <Alert severity="info">No calls for proposals are linked to this opportunity yet.</Alert>
+                                ) : (
+                                    <Stack spacing={2}>
+                                        {callForProposals.map((call) => {
+                                            const yourApplication = call.yourApplication;
+                                            const handleViewCall = () => router.push(`/console/call-for-proposals/${encodeURIComponent(call.iri)}`);
+                                            const handleApplicationClick = () => {
+                                                if (yourApplication) {
+                                                    router.push(`/console/applications/${encodeURIComponent(yourApplication.iri)}`);
+                                                } else {
+                                                    router.push(`/console/applications/new?call=${encodeURIComponent(call.iri)}`);
+                                                }
+                                            };
+                                            return (
+                                                <Paper key={call.iri} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                                                    <Stack spacing={1}>
+                                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                            <Typography variant="subtitle1" fontWeight={600}>
+                                                                Call window
+                                                            </Typography>
+                                                            <Chip size="small" color="primary" label={statusLabel(CALL_FOR_PROPOSAL_STATUSES, call.status)} />
+                                                        </Stack>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {formatShortDate(call.startDate)} – {formatShortDate(call.endDate)}
+                                                        </Typography>
+                                                        {call.organization && (
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Managed by {(call.organization as any).name ?? (call.organization as any).iri}
+                                                            </Typography>
+                                                        )}
+                                                        {yourApplication && (
+                                                            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                                                                <Chip size="small" label={`Proposal ${statusLabel(PROPOSAL_STATUSES, yourApplication.proposal?.proposalStatus ?? 'draft')}`} />
+                                                                <Chip size="small" label={`Application ${statusLabel(APPLICATION_STATUSES, yourApplication.applicationStatus)}`} />
+                                                                <Chip size="small" label={`Decision ${statusLabel(ACCEPTANCE_STATUSES, yourApplication.acceptanceStatus)}`} />
+                                                            </Stack>
+                                                        )}
+                                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }}>
+                                                            <Button variant="text" onClick={handleViewCall} endIcon={<LaunchIcon fontSize="small" />} sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}>
+                                                                View details
+                                                            </Button>
+                                                            {!call.isOwner && (
+                                                                <Button variant="contained" onClick={handleApplicationClick} sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}>
+                                                                    {yourApplication ? 'Manage application' : 'Submit application'}
+                                                                </Button>
+                                                            )}
+                                                        </Stack>
+                                                    </Stack>
+                                                </Paper>
+                                            );
+                                        })}
+                                    </Stack>
+                                )}
+                            </Stack>
+                        </CardContent>
                     </Card>
 
                     {/* Description */}
@@ -338,14 +461,12 @@ export default function OpportunityDetailsPage() {
                         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                             <MapIcon fontSize="small" />
                             <Typography variant="body2" color="text.secondary">
-                                {coords.lat && coords.lng
-                                    ? `Coordinates: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`
-                                    : 'No coordinates available'}
+                                {coordinatesText}
                             </Typography>
 
-                            {coords.lat && coords.lng && (
+                            {mapsSearchUrl && (
                                 <MuiLink
-                                    href={`https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`}
+                                    href={mapsSearchUrl}
                                     target="_blank"
                                     rel="noopener"
                                     sx={{ display: 'inline-flex', alignItems: 'center' }}
@@ -354,6 +475,15 @@ export default function OpportunityDetailsPage() {
                                 </MuiLink>
                             )}
                         </Stack>
+
+                        {latLng && (
+                            <EmbeddedMap
+                                lat={latLng.lat}
+                                lng={latLng.lng}
+                                iframeTitle={`Location map for ${op.name ?? op.iri}`}
+                                sx={{ mb: 2, height: 280, borderRadius: 2 }}
+                            />
+                        )}
 
                         {renderLand(op)}
                     </Paper>
@@ -418,7 +548,7 @@ export default function OpportunityDetailsPage() {
                         <CardContent>
                             <Typography variant="h6" gutterBottom>Contact Organization</Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Start a chat with the organization and keep this conversation linked to the opportunity.
+                                Start a chat with the organization.
                             </Typography>
                             <Button
                                 variant="contained"
@@ -487,12 +617,15 @@ export default function OpportunityDetailsPage() {
                                             <ListItem alignItems="flex-start">
                                                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
                                                 <ListItemText
-                                                    primary={p.organization?.name ?? p.organization ?? 'Organization'}
-                                                    secondary={
-                                                        Array.isArray(p.roles) && p.roles.length > 0
-                                                            ? p.roles.map((r: any) => r.name ?? r.iri ?? String(r)).join(', ')
-                                                            : undefined
-                                                    }
+                                                    primary={resolvePartnerName(p)}
+                                                    secondary={(() => {
+                                                        if (!Array.isArray(p.roles) || p.roles.length === 0) return undefined;
+                                                        const summaries = summarizePartnerRoles(p.roles);
+                                                        if (summaries.length === 0) return undefined;
+                                                        if (summaries.length === 1) return summaries[0];
+                                                        return summaries.join('\n');
+                                                    })()}
+                                                    secondaryTypographyProps={{ component: 'span', sx: { whiteSpace: 'pre-line' } }}
                                                 />
                                             </ListItem>
                                             {p.notes && (
@@ -525,6 +658,169 @@ function LabelIconSmall() {
     return <span style={{ display: 'inline-block', width: 0, height: 0 }} />;
 }
 
+function normalizeNumeric(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const parsed = parseFloat(value);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+}
+
+function fmtDateOnly(value?: string | Date): string | null {
+    if (!value) return null;
+    const date = typeof value === 'string' ? new Date(value) : value;
+    const timestamp = date?.getTime?.();
+    if (!timestamp || Number.isNaN(timestamp)) return String(value);
+    return date.toLocaleDateString();
+}
+
+function formatDateRange(start?: string | Date, end?: string | Date): string | null {
+    const startLabel = fmtDateOnly(start);
+    const endLabel = fmtDateOnly(end);
+    if (startLabel && endLabel) return `${startLabel} – ${endLabel}`;
+    return startLabel ?? endLabel ?? null;
+}
+
+function formatTaxonomyLabel(value: any): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') return value;
+    return value.name ?? value.label ?? value.title ?? value.iri ?? null;
+}
+
+function formatTaxonomyList(value: any): string | null {
+    if (!value) return null;
+    if (Array.isArray(value)) {
+        const labels = value
+            .map(item => formatTaxonomyLabel(item))
+            .filter((item): item is string => Boolean(item));
+        if (labels.length === 0) return null;
+        return Array.from(new Set(labels)).join(', ');
+    }
+    return formatTaxonomyLabel(value);
+}
+
+function resolvePartnerName(partner: any): string {
+    const organization = partner?.organization ?? null;
+    if (typeof organization === 'string') return organization;
+    const organizationLabel = organization?.name ?? organization?.label ?? organization?.legalName ?? organization?.title;
+    if (organizationLabel) return organizationLabel;
+    const fallback = partner?.organizationName ?? partner?.organizationLabel ?? partner?.organizationTitle;
+    if (typeof fallback === 'string' && fallback.trim().length > 0) return fallback.trim();
+    const organizationIri = organization?.iri ?? partner?.organizationIri ?? partner?.organization ?? partner?.organizationId;
+    if (typeof organizationIri === 'string' && organizationIri.trim().length > 0) return organizationIri.trim();
+    return 'Organization';
+}
+
+function summarizePartnerRoles(roles: any[]): string[] {
+    return roles
+        .map((role) => {
+            const roleTypeLabel = formatTaxonomyList(role?.roleTypes ?? role?.roleType);
+            const namedRole = formatTaxonomyLabel(role);
+            const baseLabel = roleTypeLabel ?? namedRole ?? (typeof role?.iri === 'string' ? role.iri : null);
+            const dateRange = formatDateRange(role?.startDate, role?.endDate);
+            if (baseLabel && dateRange) return `${baseLabel} • ${dateRange}`;
+            if (baseLabel) return baseLabel;
+            return dateRange ?? null;
+        })
+        .filter((item): item is string => Boolean(item));
+}
+
+function formatOpportunityAddressDisplay(address: any): string {
+    if (!address) return '';
+    if (typeof address === 'string') return address;
+
+    const stringRepresentation = typeof address.stringRepresentation === 'string'
+        ? address.stringRepresentation.trim()
+        : '';
+    if (stringRepresentation) return stringRepresentation;
+
+    const parts: string[] = [];
+
+    const unitDesignator = address.unitDesignator ?? address.unit ?? address.unitType;
+    const unitIdentifier = address.unitIdentifier ?? address.unitNumber ?? address.unitId;
+    const unitSegment = [unitDesignator, unitIdentifier]
+        .map(value => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+    if (unitSegment) parts.push(unitSegment);
+
+    const streetPieces: string[] = [];
+    const streetNumber = address.streetNumber ?? address.houseNumber ?? address.number;
+    if (streetNumber) streetPieces.push(String(streetNumber).trim());
+    const streetDirection = address.streetDirection;
+    if (streetDirection) streetPieces.push(String(streetDirection).trim());
+    const streetName = address.streetName ?? address.street ?? address.road;
+    if (streetName) streetPieces.push(String(streetName).trim());
+    const streetType = address.streetType;
+    if (streetType) streetPieces.push(String(streetType).trim());
+
+    const streetLine = streetPieces.filter(Boolean).join(' ').trim();
+    if (streetLine) {
+        parts.push(streetLine);
+    } else {
+        const line1 = address.line1 ?? address.addressLine1 ?? null;
+        if (line1) {
+            parts.push(String(line1).trim());
+        }
+    }
+
+    const line2 = address.line2 ?? address.addressLine2 ?? null;
+    if (line2) parts.push(String(line2).trim());
+
+    const locality = address.localityName ?? address.city ?? address.town ?? address.municipality;
+    if (locality) parts.push(String(locality).trim());
+
+    const region = address.provinceName ?? address.state ?? address.region ?? address.county;
+    const postal = address.postalCode ?? address.zip ?? address.postcode;
+    const regionPostal = [region, postal]
+        .map(value => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+    if (regionPostal) parts.push(regionPostal);
+
+    const country = address.countryName ?? address.country;
+    if (country) parts.push(String(country).trim());
+
+    const cleaned = parts
+        .map(value => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean);
+
+    if (cleaned.length > 0) return cleaned.join(', ');
+
+    if (typeof address.label === 'string') return address.label;
+
+    return '';
+}
+
+function extractLatLngFromAddress(address: any): { lat: number | null; lng: number | null } {
+    if (!address) return { lat: null, lng: null };
+    let lat = normalizeNumeric(
+        address.latitude ??
+        address.lat ??
+        address.latitudeDegrees ??
+        address.geo?.latitude ??
+        address.position?.lat
+    );
+    let lng = normalizeNumeric(
+        address.longitude ??
+        address.lng ??
+        address.longitudeDegrees ??
+        address.geo?.longitude ??
+        address.position?.lng
+    );
+
+    if ((lat === null || lng === null) && Array.isArray(address.geometry?.coordinates)) {
+        const [maybeLng, maybeLat] = address.geometry.coordinates;
+        lat = lat ?? normalizeNumeric(maybeLat);
+        lng = lng ?? normalizeNumeric(maybeLng);
+    }
+
+    return { lat, lng };
+}
+
 /* Render land details defensively (notes, addresses, area, etc. if present) */
 function renderLand(op: OpportunityDTO) {
     const lands: any[] = Array.isArray(op.land) ? op.land : (op.lands ?? (op.land ? [op.land] : []));
@@ -535,35 +831,80 @@ function renderLand(op: OpportunityDTO) {
     return (
         <Stack spacing={2} sx={{ mt: 1 }}>
             {lands.map((land, i) => {
-                const addresses: any[] = Array.isArray(land?.address) ? land.address : [];
-                const areaVal = land?.area?.value ?? land?.area;
-                const unit = land?.area?.unit ?? land?.unit;
-                const uses: any[] = Array.isArray(land?.uses) ? land.uses : (Array.isArray(land?.landUse) ? land.landUse : []);
+                const landKey = typeof land?.iri === 'string' ? land.iri : `land-${i}`;
+                const addresses: any[] = Array.isArray(land?.addresses)
+                    ? land.addresses
+                    : Array.isArray(land?.address)
+                        ? land.address
+                        : [];
+                const rawArea = land?.area?.value ?? land?.area ?? null;
+                const areaValue = typeof rawArea === 'number'
+                    ? Number.isFinite(rawArea)
+                        ? rawArea.toLocaleString()
+                        : String(rawArea)
+                    : typeof rawArea === 'string'
+                        ? rawArea.trim()
+                        : null;
+                const areaUnit = formatTaxonomyLabel(land?.area?.unit ?? land?.areaUnit ?? land?.unit);
+                const legacyUses = formatTaxonomyList(land?.uses ?? land?.landUse);
+                const landUseDetails = [
+                    { label: 'Current land use', value: formatTaxonomyList(land?.currentLandUse) },
+                    { label: 'Designated land use', value: formatTaxonomyList(land?.designatedLandUse) },
+                    { label: 'Proposed land use', value: formatTaxonomyList(land?.proposedLandUse) },
+                ];
                 return (
-                    <Paper key={i} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
-                        <Stack spacing={0.75}>
-                            {land?.notes && (
-                                <Typography variant="body2" color="text.secondary">Notes: {land.notes}</Typography>
-                            )}
-                            {(areaVal || unit) && (
-                                <Typography variant="body2">Area: <b>{areaVal ?? '-'}</b> {unit ?? ''}</Typography>
-                            )}
-                            {uses.length > 0 && (
-                                <Typography variant="body2">Uses: {uses.map(u => u?.name ?? u?.iri ?? String(u)).join(', ')}</Typography>
-                            )}
-                            {addresses.length > 0 && (
-                                <Stack spacing={0.5}>
-                                    {addresses.map((a, idx) => (
-                                        <Typography key={idx} variant="body2" color="text.secondary">
-                                            {[
-                                                a.line1, a.line2, a.city, a.region || a.state, a.postalCode, a.country,
-                                            ].filter(Boolean).join(', ')}
+                    <React.Fragment key={landKey}>
+                        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                            <Stack spacing={0.75}>
+                                {addresses.length > 0 && (
+                                    <Stack spacing={0.75}>
+                                        {addresses.map((a, idx) => {
+                                            const summary = formatOpportunityAddressDisplay(a);
+                                            const { lat, lng } = extractLatLngFromAddress(a);
+                                            return (
+                                                <Stack key={idx} spacing={0.25}>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {summary || 'Address on file'}
+                                                    </Typography>
+                                                    {lat != null && lng != null && (
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Coordinates: {lat.toFixed(6)}, {lng.toFixed(6)}
+                                                        </Typography>
+                                                    )}
+                                                </Stack>
+                                            );
+                                        })}
+                                    </Stack>
+                                )}
+                            </Stack>
+
+                        </Paper>
+                        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                            <Stack spacing={0.75}>
+                                {land?.notes && (
+                                    <Typography variant="body2" color="text.secondary">Notes: {land.notes}</Typography>
+                                )}
+                                {land?.parcelId && (
+                                    <Typography variant="body2" color="text.secondary">Parcel ID: {land.parcelId}</Typography>
+                                )}
+                                {(areaValue || areaUnit) && (
+                                    <Typography variant="body2" color="text.secondary">
+                                        Area: <b>{areaValue ?? '-'}</b>{areaUnit ? ` ${areaUnit}` : ''}
+                                    </Typography>
+                                )}
+                                {legacyUses && (
+                                    <Typography variant="body2" color="text.secondary">Land use: {legacyUses}</Typography>
+                                )}
+                                {landUseDetails
+                                    .filter(detail => detail.value)
+                                    .map(detail => (
+                                        <Typography key={detail.label} variant="body2" color="text.secondary">
+                                            {detail.label}: {detail.value}
                                         </Typography>
                                     ))}
-                                </Stack>
-                            )}
-                        </Stack>
-                    </Paper>
+                            </Stack>
+                        </Paper>
+                    </React.Fragment>
                 );
             })}
         </Stack>

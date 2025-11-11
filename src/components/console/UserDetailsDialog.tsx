@@ -19,6 +19,7 @@ interface Props {
     isAdmin?: boolean;
     onResetPassword?: (userId: string) => void;
     isResetting?: boolean;
+    resettingUserId?: string | null;
     resetResult?: ResetResponse | null;
 }
 
@@ -40,6 +41,7 @@ export function UserDetailsDialog({
     isAdmin = false,
     onResetPassword,
     isResetting,
+    resettingUserId,
     resetResult,
 }: Props) {
     return (
@@ -73,9 +75,9 @@ export function UserDetailsDialog({
                     <Button
                         variant="contained"
                         onClick={() => onResetPassword(user._id)}
-                        disabled={isResetting}
+                        disabled={Boolean(isResetting)}
                     >
-                        {isResetting ? 'Resetting…' : 'Reset Password'}
+                        {isResetting && resettingUserId === user._id ? 'Resetting…' : 'Reset Password'}
                     </Button>
                 )}
             </DialogActions>

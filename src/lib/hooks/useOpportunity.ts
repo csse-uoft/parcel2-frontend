@@ -16,6 +16,7 @@ export type ContactDTO = {
 export interface OpportunityDTO {
     iri: string;
     name?: string;
+    isOwner?: boolean;
     description?: string;
     partnershipRoles?: RoleDTO[];
     primaryContact?: ContactDTO;

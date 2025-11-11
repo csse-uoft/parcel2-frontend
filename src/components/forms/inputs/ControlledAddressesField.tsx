@@ -15,8 +15,6 @@ type Props = {
     /** RHF path to the array, e.g. "address" or "land.address" */
     name: string;
     disabled?: boolean;
-    /** Forward to AddressForm */
-    simplified?: boolean;
     /** Optional heading (defaults to "Addresses") */
     title?: string;
     /** Hard cap on items (undefined = unlimited) */
@@ -26,7 +24,6 @@ type Props = {
 export default function ControlledAddressesField({
                                                      name,
                                                      disabled,
-                                                     simplified = true,
                                                      title = 'Addresses',
                                                      maxItems,
                                                  }: Props) {
@@ -65,7 +62,6 @@ export default function ControlledAddressesField({
                         <Grid size={{ xs: 12 }}>
                             <AddressForm
                                 baseName={`${name}.${idx}`}
-                                simplified={simplified}
                                 disabled={disabled}
                             />
                         </Grid>

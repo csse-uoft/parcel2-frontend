@@ -27,6 +27,14 @@ export function useOpportunity(iri?: string | null) {
     return useSWR<OpportunityDTO, FetcherError>(key, fetcher, { revalidateOnFocus: false });
 }
 
+export function useMyOpportunities() {
+    return useSWR<OpportunityDTO[] | undefined, FetcherError>(
+        '/api/opportunities/me',
+        fetcher,
+        { revalidateOnFocus: false }
+    );
+}
+
 // Create
 export function useCreateOpportunity() {
     return useSWRMutation<OpportunityDTO, FetcherError, string, OpportunityFormData>(

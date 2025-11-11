@@ -108,6 +108,7 @@ export function useUserProfile() {
 }
 
 export interface Organization {
+    iri?: string;
     primaryAddress: Address;
     currentLegalName: string;
     legalNames?: string[];

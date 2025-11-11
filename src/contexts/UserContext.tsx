@@ -165,11 +165,14 @@ export const UserProvider = ({ children }: ProviderProps) => {
 
     // if the user is not registered, redirect to the registration page
     useEffect(() => {
-        if (user && user.username !== 'guest' && !user.isRegistrationComplete && pathname !== '/register/setup') {
-            // if the user is not registered, redirect to the registration page
+        if (!user || isLoading) {
+            return;
+        }
+
+        if (user.username !== 'guest' && !user.isRegistrationComplete && pathname !== '/register/setup') {
             router.push('/register/setup');
         }
-    }, [pathname]);
+    }, [user?.username, user?.isRegistrationComplete, pathname, isLoading, router]);
 
 
     const logout = async () => {

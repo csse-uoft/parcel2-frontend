@@ -17,6 +17,7 @@ import {
     Theme,
     Skeleton,
     Divider,
+    Tooltip,
 } from '@mui/material';
 import Link from 'next/link';
 import { OpportunityDetail } from './types';
@@ -142,7 +143,23 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" fullScreen={fullScreen}>
-            <DialogTitle>{isLoading ? 'Loading…' : data?.name ?? 'Details'}</DialogTitle>
+            <DialogTitle sx={{ pb: 1 }}>
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="h6" component="div" noWrap title={data?.name ?? undefined}>
+                            {isLoading ? 'Loading…' : data?.name ?? 'Details'}
+                        </Typography>
+                        {organizationName && (
+                            <Typography variant="body2" color="text.secondary" noWrap title={organizationName}>
+                                {organizationName}
+                            </Typography>
+                        )}
+                    </Box>
+                    {!fullScreen && (
+                        <Button onClick={onClose} size="small" variant="text">Close</Button>
+                    )}
+                </Stack>
+            </DialogTitle>
             <DialogContent dividers>
                 {isLoading ? (
                     <Stack spacing={2}>
@@ -165,7 +182,6 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
                                 onClick={() => openViewerAt(0)}
                             />
                         )}
-
                         {data.description && (
                             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
                                 {data.description}
@@ -185,10 +201,26 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
                         </Stack>
 
                         <Grid container spacing={2}>
+                            {organizationName && (
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="subtitle2">Organization</Typography>
+                                    <Typography variant="body2" color="text.secondary" noWrap title={organizationName}>
+                                        {organizationName}
+                                    </Typography>
+                                </Grid>
+                            )}
                             {data.primaryContact?.contactName && (
                                 <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="subtitle2">Primary Contact</Typography>
                                     <Typography variant="body2" color="text.secondary">{data.primaryContact.contactName}</Typography>
+                                </Grid>
+                            )}
+                            {data.additionalInfo?.datePosted && (
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="subtitle2">Published</Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {new Date(data.additionalInfo.datePosted).toLocaleString()}
+                                    </Typography>
                                 </Grid>
                             )}
                             {data.additionalInfo?.dateModified && (
@@ -196,6 +228,14 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
                                     <Typography variant="subtitle2">Last Updated</Typography>
                                     <Typography variant="body2" color="text.secondary">
                                         {new Date(data.additionalInfo.dateModified).toLocaleString()}
+                                    </Typography>
+                                </Grid>
+                            )}
+                            {typeof data.land?.notes === 'string' && data.land.notes.trim().length > 0 && (
+                                <Grid size={{ xs: 12 }}>
+                                    <Typography variant="subtitle2">Additional Notes</Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                                        {data.land.notes}
                                     </Typography>
                                 </Grid>
                             )}
@@ -240,17 +280,21 @@ export default function QuickViewDialog({ id, open, onClose }: Props) {
                 ) : null}
             </DialogContent>
 
-            <DialogActions>
+            <DialogActions sx={{ flexWrap: 'wrap', gap: 1, justifyContent: fullScreen ? 'space-between' : 'flex-end', px: { xs: 2, sm: 3 }, py: 2 }}>
                 {opportunityIri && (
-                    <Button
-                        variant={isCurrentFavourite ? 'contained' : 'outlined'}
-                        color={isCurrentFavourite ? 'primary' : 'inherit'}
-                        startIcon={isCurrentFavourite ? <BookmarkIcon /> : <BookmarkBorderOutlinedIcon />}
-                        onClick={handleToggleFavourite}
-                        disabled={favouritePending}
-                    >
-                        {isCurrentFavourite ? 'Favourited' : 'Save to favourites'}
-                    </Button>
+                    <Tooltip title={isCurrentFavourite ? 'Remove from favourites' : 'Add to favourites'}>
+                        <span>
+                            <Button
+                                variant={isCurrentFavourite ? 'contained' : 'outlined'}
+                                color={isCurrentFavourite ? 'primary' : 'inherit'}
+                                startIcon={isCurrentFavourite ? <BookmarkIcon /> : <BookmarkBorderOutlinedIcon />}
+                                onClick={handleToggleFavourite}
+                                disabled={favouritePending}
+                            >
+                                {isCurrentFavourite ? 'Saved' : 'Save' }
+                            </Button>
+                        </span>
+                    </Tooltip>
                 )}
                 {organizationIri && (
                     <Button
