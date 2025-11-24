@@ -50,7 +50,7 @@ import ImageViewer from "@/components/media/ImageViewer";
 import EmbeddedMap from '@/components/maps/EmbeddedMap';
 import { useCreateChat } from '@/lib/hooks/useChat';
 import { useSnackbar } from 'notistack';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { FetcherError } from '@/lib/errors';
 import { useOpportunityFavourites } from '@/contexts/OpportunityFavouritesContext';
 

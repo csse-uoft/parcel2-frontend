@@ -21,6 +21,7 @@ import {
     useMediaQuery,
     Theme,
 } from '@mui/material';
+import { useTranslations } from 'next-intl';
 
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MapIcon from '@mui/icons-material/Map';
@@ -45,6 +46,7 @@ import { LatLng, SearchHit } from '@/components/console/opportunity/search/types
 import { useDebounced } from '@/components/console/opportunity/search/utils';
 
 export default function OpportunitySearchPage() {
+    const t = useTranslations('Console.Search');
     const { items: roleTypes } = useTaxonomy('bedeo:RoleType');
     const { items: projectTypes } = useTaxonomy('bedeo:ProjectType');
     const { items: projectStages } = useTaxonomy('bedeo:ProjectStage');
@@ -212,40 +214,19 @@ export default function OpportunitySearchPage() {
                 >
                     <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2, gap: 1.25 }}>
                         {/* Header / toolbar */}
-                        <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-                            <Typography variant={isSmall ? 'h6' : 'h5'} sx={{ flex: 1, minWidth: 180 }}>
-                                Opportunities
-                            </Typography>
-
-                            {/* Filters */}
+                        <Stack direction="row" alignItems="center" spacing={1}>
                             <Button
-                                variant="text"
-                                size="small"
+                                variant="outlined"
                                 startIcon={<FilterListIcon/>}
                                 onClick={() => setFiltersOpen(true)}
+                                size="small"
                             >
-                                Filters
+                                {t('filters')}
                             </Button>
 
-
-                            {/* Map toggle: icon-only on small; text button on larger */}
-                            {isSmall ? (
-                                <Tooltip title={mapVisible ? 'Hide map' : 'Show map'}>
-                                    <IconButton onClick={() => setMapVisible((v) => !v)}
-                                                color={mapVisible ? 'primary' : 'default'}>
-                                        <MapIcon/>
-                                    </IconButton>
-                                </Tooltip>
-                            ) : (
-                                <Button size="small" startIcon={<MapIcon/>} onClick={() => setMapVisible((v) => !v)}>
-                                    {mapVisible ? 'Hide map' : 'Show map'}
-                                </Button>
-                            )}
-
-                            {/* On small screens move actions into a menu */}
                             {isSmall ? (
                                 <>
-                                    <IconButton onClick={openMenu}>
+                                    <IconButton size="small" onClick={openMenu}>
                                         <MoreVertIcon/>
                                     </IconButton>
                                     <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
@@ -259,7 +240,7 @@ export default function OpportunitySearchPage() {
                                                 {limitToMap ? <CheckBoxIcon fontSize="small"/> :
                                                     <CheckBoxOutlineBlankIcon fontSize="small"/>}
                                             </ListItemIcon>
-                                            <ListItemText>Limit to map</ListItemText>
+                                            <ListItemText>{t('limitToMap')}</ListItemText>
                                         </MenuItem>
                                         <MenuItem
                                             onClick={() => {
@@ -270,7 +251,7 @@ export default function OpportunitySearchPage() {
                                             <ListItemIcon>
                                                 <RefreshIcon fontSize="small"/>
                                             </ListItemIcon>
-                                            <ListItemText>Refresh</ListItemText>
+                                            <ListItemText>{t('refresh')}</ListItemText>
                                         </MenuItem>
                                         {/*<MenuItem*/}
                                         {/*    onClick={() => {*/}
@@ -298,12 +279,12 @@ export default function OpportunitySearchPage() {
                                         startIcon={limitToMap ? <CheckBoxIcon/> : <CheckBoxOutlineBlankIcon/>}
                                         onClick={() => setLimitToMap(v => !v)}
                                     >
-                                        Limit to map
+                                        {t('limitToMap')}
                                     </Button>
 
                                     <Button variant="text" size="small" onClick={() => refresh(debouncedBody)}
                                             disabled={refreshing}>
-                                        Refresh
+                                        {t('refresh')}
                                     </Button>
                                     {/*<Button size="small" onClick={clearAll}>Clear</Button>*/}
                                 </>
@@ -318,7 +299,7 @@ export default function OpportunitySearchPage() {
                             {extraChipCount > 0 && (
                                 <Chip
                                     size="small"
-                                    label={`+${extraChipCount} more`}
+                                    label={t('more', { count: extraChipCount })}
                                     onClick={() => setFiltersOpen(true)}
                                     variant="outlined"
                                 />

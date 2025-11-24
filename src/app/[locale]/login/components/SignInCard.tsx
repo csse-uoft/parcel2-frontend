@@ -16,6 +16,7 @@ import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
 import { useLogin } from "@/lib/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { FetcherError } from "@/lib/errors";
+import { useLocale } from 'next-intl';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -44,6 +45,7 @@ export default function SignInCard() {
     const [open, setOpen] = React.useState(false);
 
     const router = useRouter();
+    const locale = useLocale();
     const { trigger: login, error: loginError, isMutating } = useLogin();
 
     const handleClickOpen = () => {
@@ -72,7 +74,8 @@ export default function SignInCard() {
             });
             console.log(result);
 
-            router.push('/'); // Redirect to home page after successful login
+            // Force full reload to ensure auth state is picked up correctly
+            window.location.href = `/${locale}`;
         } catch (error: any) {
             console.log('Login failed:', error?.data);
             // Handle error (e.g., show an error message)

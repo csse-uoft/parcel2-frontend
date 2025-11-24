@@ -1,0 +1,147 @@
+{
+  "Header": {
+    "brand": "Parcel",
+    "tagline": "Connecting partners to build equitable, sustainable, and affordable housing solutions across Canada.",
+    "nav": {
+      "home": "Home",
+      "about": "About",
+      "mission": "Our Mission",
+      "resources": "Resources",
+      "caseStudies": "Case Studies",
+      "sectors": "Sectors",
+      "toolkits": "Toolkits"
+    },
+    "actions": {
+      "login": "Log in",
+      "logout": "Log out",
+      "dashboard": "Dashboard"
+    },
+    "language": {
+      "ariaLabel": "Select language",
+      "options": {
+        "en": "English",
+        "fr": "French"
+      }
+    },
+    "logoAlt": "University of Toronto logo"
+  },
+  "Footer": {
+    "fundingAlt": "Funded in part by the Government of Canada"
+  },
+  "Home": {
+    "title": "Housing Partnership Platform",
+    "taglineSummary": "The Housing Partnership Platform is an AI-enabled platform that matches partners, shares knowledge, and drives innovative housing and mixed-use projects, to help deliver equitable, sustainable, and affordable housing solutions across Canada.",
+    "shortDescription": "The Housing Partnership Platform is a web-based platform designed to unlock collaborative potential across public, private, and non-profit sectors and foster partnerships between developers, non-profits, municipalities, lenders and other housing stakeholders. Powered by AI-enabled matchmaking and knowledge-sharing tools, the platform empowers stakeholders to co-create resilient, equitable, and sustainable developments that address Canada's complex affordable housing crisis.",
+    "aboutSubtitle1": "Who We Are",
+    "elevatorPitch": "The Housing Partnership Platform, developed at the Centre for Social Services Engineering (University of Toronto), is a web platform designed to connect developers, municipalities, non-profits, lenders, and government agencies to co-create innovative mixed-use projects. By combining smart matchmaking, knowledge-sharing tools and access to funding support, the platform aims to help foster diverse partnerships that prioritize affordable housing, Indigenous-led initiatives, and sustainability. Beyond connecting stakeholders, it equips them with training, mentorship, and best practices to ensure projects are equitable, resilient, and financially viable, unlocking collaborative solutions to Canada’s housing crisis.",
+    "aboutSubtitle2": "Our Vision",
+    "featuresTitle": "Key features include:",
+    "features": {
+      "matchmaking": "Smart matchmaking: AI-assisted partner search and self-assessment tools to optimize collaboration readiness.",
+      "knowledge": "Knowledge hub: Training modules, best-practices repository, and peer-to-peer mentorship to strengthen industry capacity.",
+      "funding": "Funding support: Tools for governmental agencies to filter, rank, and recommend financing opportunities, while attracting non-traditional funders.",
+      "equity": "Equity focus: Prioritization of Indigenous housing initiatives and support for marginalized groups through secure, affordable housing solutions."
+    }
+  },
+  "About": {
+    "title": "About the Housing Partnership Platform",
+    "body": "The Housing Partnership Platform is a web-based hub created by the University of Toronto's Centre for Social Services Engineering. Designed to help tackle Canada's complex housing challenges, it makes available knowledge-sharing resources and uses AI-powered matchmaking to help connect developers, non-profits, municipalities, lenders, and government agencies. By fostering diverse partnerships, including Indigenous-led initiatives, the platform empowers stakeholders to co-create innovative mixed-use projects that deliver sustainable, equitable and affordable housing.",
+    "missionHeading": "Our Mission"
+  },
+  "Mission": {
+    "title": "Our Mission",
+    "statement": "Help build equitable, sustainable, and resilient housing solutions through collaboration, innovation, and shared knowledge."
+  },
+  "Console": {
+    "Nav": {
+      "SearchListings": {
+        "title": "Search Listings",
+        "searchOpportunity": "Search Opportunity",
+        "savedSearches": "Saved Searches"
+      },
+      "MyOpportunities": {
+        "title": "My Opportunities",
+        "postOpportunity": "Post Opportunity",
+        "viewMyOpportunities": "View My Opportunities",
+        "callForProposals": "Call for Proposals",
+        "viewFavourites": "View Favourites"
+      },
+      "MyApplications": {
+        "title": "My Applications",
+        "myApplications": "My Applications",
+        "startApplication": "Start Application"
+      },
+      "MyInterests": {
+        "title": "My Interests",
+        "postInterest": "Post Interest",
+        "viewMyInterests": "View My Interests"
+      },
+      "MyMessages": {
+        "title": "My Messages",
+        "chat": "Chat",
+        "inbox": "Inbox",
+        "sent": "Sent",
+        "archived": "Archived"
+      },
+      "Account": {
+        "title": "Account",
+        "myProfile": "My Profile",
+        "myOrganization": "My Organization",
+        "changePassword": "Change Password",
+        "inviteUser": "Invite User"
+      },
+      "UserManagement": {
+        "title": "User Management",
+        "inviteUsers": "Invite Users",
+        "manageUsers": "Manage Users",
+        "organizations": "Organizations"
+      },
+      "Admin": {
+        "title": "Admin",
+        "dashboard": "Dashboard",
+        "systemStatus": "System Status"
+      },
+      "SystemInformation": {
+        "title": "System Information",
+        "adminDashboard": "Admin Dashboard",
+        "serverStatus": "Server Status"
+      }
+    },
+      "Dashboard": {
+      "title": "Dashboard | Parcel",
+      "welcome": "Welcome to the dashboard"
+    },
+    "Search": {
+      "limitToMap": "Limit to map",
+      "refresh": "Refresh",
+      "clear": "Clear",
+      "filters": "Filters",
+      "more": "+{count} more",
+      "Filters": {
+        "title": "Filters",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Name, description…",
+        "projectType": "Project Type",
+        "projectStage": "Project Stage",
+        "roles": "Roles",
+        "posted": "Posted",
+        "searchable": "Searchable",
+        "sortBy": "Sort By",
+        "sortDir": "Sort Direction",
+        "pageSize": "Page Size",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "clear": "Clear",
+        "any": "Any",
+        "yes": "Yes",
+        "no": "No",
+        "lastUpdated": "Last Updated",
+        "datePosted": "Date Posted",
+        "name": "Name",
+        "direction": "Direction",
+        "descending": "Descending",
+        "ascending": "Ascending"
+      }
+    }
+  }
+}

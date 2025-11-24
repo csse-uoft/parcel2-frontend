@@ -21,6 +21,7 @@ import {
     MenuItem,
     Grid,
 } from '@mui/material';
+import { useTranslations } from 'next-intl';
 
 import type { TaxonomyOption } from '@/components/forms/inputs/ControlledTaxonomySelect';
 
@@ -60,6 +61,7 @@ export default function OpportunitySearchFilters({
                                                      onClear,
                                                      taxonomies,
                                                  }: Props) {
+    const t = useTranslations('Console.Search.Filters');
     const isMobile = useMediaQuery((t: Theme) => t.breakpoints.down('sm'));
 
     const [draft, setDraft] = React.useState<FilterState>(value);
@@ -79,14 +81,14 @@ export default function OpportunitySearchFilters({
 
     return (
         <Dialog open={open} onClose={onClose} fullScreen={isMobile} maxWidth="md" fullWidth>
-            <DialogTitle>Filters</DialogTitle>
+            <DialogTitle>{t('title')}</DialogTitle>
             <DialogContent dividers>
                 <Stack spacing={2}>
                     <TextField
-                        label="Search"
+                        label={t('searchLabel')}
                         value={draft.q}
                         onChange={(e) => set('q', e.target.value)}
-                        placeholder="Name, description…"
+                        placeholder={t('searchPlaceholder')}
                         fullWidth
                     />
 
@@ -97,7 +99,7 @@ export default function OpportunitySearchFilters({
                                 getOptionLabel={(o) => o.label}
                                 value={taxonomies.projectTypes.find((o) => o.id === draft.projectType) ?? null}
                                 onChange={(_, v) => set('projectType', v?.id ?? null)}
-                                renderInput={(p) => <TextField {...p} label="Project Type" />}
+                                renderInput={(p) => <TextField {...p} label={t('projectType')} />}
                             />
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
@@ -106,7 +108,7 @@ export default function OpportunitySearchFilters({
                                 getOptionLabel={(o) => o.label}
                                 value={taxonomies.projectStages.find((o) => o.id === draft.projectStage) ?? null}
                                 onChange={(_, v) => set('projectStage', v?.id ?? null)}
-                                renderInput={(p) => <TextField {...p} label="Project Stage" />}
+                                renderInput={(p) => <TextField {...p} label={t('projectStage')} />}
                             />
                         </Grid>
                     </Grid>
@@ -122,50 +124,50 @@ export default function OpportunitySearchFilters({
                                 <Chip variant="outlined" label={option.label} {...getTagProps({ index })} key={option.id} />
                             ))
                         }
-                        renderInput={(p) => <TextField {...p} label="Partnership Roles" />}
+                        renderInput={(p) => <TextField {...p} label={t('roles')} />}
                     />
 
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="posted-label">Posted</InputLabel>
+                                <InputLabel id="posted-label">{t('posted')}</InputLabel>
                                 <Select
                                     size="small"
                                     labelId="posted-label"
                                     value={triSelect(draft.posted)}
-                                    label="Posted"
+                                    label={t('posted')}
                                     onChange={(e) => set('posted', fromTri(e.target.value as any))}
                                 >
-                                    <MenuItem value="any">Any</MenuItem>
-                                    <MenuItem value="true">Yes</MenuItem>
-                                    <MenuItem value="false">No</MenuItem>
+                                    <MenuItem value="any">{t('any')}</MenuItem>
+                                    <MenuItem value="true">{t('yes')}</MenuItem>
+                                    <MenuItem value="false">{t('no')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="searchable-label">Searchable</InputLabel>
+                                <InputLabel id="searchable-label">{t('searchable')}</InputLabel>
                                 <Select
                                     size="small"
                                     labelId="searchable-label"
                                     value={triSelect(draft.searchable)}
-                                    label="Searchable"
+                                    label={t('searchable')}
                                     onChange={(e) => set('searchable', fromTri(e.target.value as any))}
                                 >
-                                    <MenuItem value="any">Any</MenuItem>
-                                    <MenuItem value="true">Yes</MenuItem>
-                                    <MenuItem value="false">No</MenuItem>
+                                    <MenuItem value="any">{t('any')}</MenuItem>
+                                    <MenuItem value="true">{t('yes')}</MenuItem>
+                                    <MenuItem value="false">{t('no')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="page-size-label">Page Size</InputLabel>
+                                <InputLabel id="page-size-label">{t('pageSize')}</InputLabel>
                                 <Select
                                     size="small"
                                     labelId="page-size-label"
                                     value={draft.pageSize}
-                                    label="Page Size"
+                                    label={t('pageSize')}
                                     onChange={(e) => set('pageSize', Number(e.target.value))}
                                 >
                                     {[10, 20, 30, 50, 100].map((n) => (
@@ -181,32 +183,32 @@ export default function OpportunitySearchFilters({
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="sort-by-label">Sort By</InputLabel>
+                                <InputLabel id="sort-by-label">{t('sortBy')}</InputLabel>
                                 <Select
                                     size="small"
                                     labelId="sort-by-label"
                                     value={draft.sortBy}
-                                    label="Sort By"
+                                    label={t('sortBy')}
                                     onChange={(e) => set('sortBy', e.target.value as FilterState['sortBy'])}
                                 >
-                                    <MenuItem value="dateModified">Last Updated</MenuItem>
-                                    <MenuItem value="datePosted">Date Posted</MenuItem>
-                                    <MenuItem value="name">Name</MenuItem>
+                                    <MenuItem value="dateModified">{t('lastUpdated')}</MenuItem>
+                                    <MenuItem value="datePosted">{t('datePosted')}</MenuItem>
+                                    <MenuItem value="name">{t('name')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="sort-dir-label">Direction</InputLabel>
+                                <InputLabel id="sort-dir-label">{t('direction')}</InputLabel>
                                 <Select
                                     size="small"
                                     labelId="sort-dir-label"
                                     value={draft.sortDir}
-                                    label="Direction"
+                                    label={t('direction')}
                                     onChange={(e) => set('sortDir', e.target.value as FilterState['sortDir'])}
                                 >
-                                    <MenuItem value="desc">Desc</MenuItem>
-                                    <MenuItem value="asc">Asc</MenuItem>
+                                    <MenuItem value="desc">{t('descending')}</MenuItem>
+                                    <MenuItem value="asc">{t('ascending')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -246,11 +248,11 @@ export default function OpportunitySearchFilters({
                             onClose();
                         }}
                     >
-                        Clear
+                        {t('clear')}
                     </Button>
                 )}
                 <Box sx={{ flex: 1 }} />
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={onClose}>{t('cancel')}</Button>
                 <Button
                     variant="contained"
                     onClick={() => {
@@ -258,7 +260,7 @@ export default function OpportunitySearchFilters({
                         onClose();
                     }}
                 >
-                    Apply
+                    {t('apply')}
                 </Button>
             </DialogActions>
         </Dialog>

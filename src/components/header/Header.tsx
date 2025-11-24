@@ -10,29 +10,33 @@ import {
     Tabs,
     Tab,
     Box,
+    Stack,
 } from '@mui/material';
-import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useUserContext } from '@/contexts/UserContext';
 import ModeSwitch from "@/components/ThemeModeSwitch";
+import LanguageToggle from '@/components/header/LanguageToggle';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import Image from 'next/image';
 
 const navTabs = [
-    { label: 'Home', href: '/' },
-    { label: 'Resources', href: '/resources' },
-    { label: 'Case Studies', href: '/casestudies' },
-    { label: 'Sectors', href: '/sectors' },
-    { label: 'Toolkits', href: '/toolkits' },
+    { labelKey: 'Header.nav.home', href: '/' },
+    { labelKey: 'Header.nav.mission', href: '/#mission' },
+    { labelKey: 'Header.nav.about', href: '/#about' },
+    // { labelKey: 'Header.nav.resources', href: '/resources' },
+    // { labelKey: 'Header.nav.caseStudies', href: '/casestudies' },
+    // { labelKey: 'Header.nav.sectors', href: '/sectors' },
+    // { labelKey: 'Header.nav.toolkits', href: '/toolkits' },
 ];
 
 export default function Header() {
     const router = useRouter();
-    const pathname = usePathname();                     // current route
-    const user = useUserContext();                      // typed context
+    const pathname = usePathname();
+    const user = useUserContext();
+    const t = useTranslations();
 
-    /* Match tab by route – returns index | false */
-    console.log(pathname)
     const activeTab = React.useMemo(() => {
-        const idx = navTabs.findLastIndex(t => pathname?.startsWith(t.href));
-        console.log('activeTab', idx);
+        const idx = navTabs.findLastIndex(tab => pathname?.startsWith(tab.href));
         return idx === -1 ? false : idx;
     }, [pathname]);
 
@@ -45,18 +49,35 @@ export default function Header() {
         <header>
             <AppBar sx={{ p: 1.5, bgcolor: 'rgb(0, 23, 81)' }} position="static">
                 <Toolbar>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h4">Parcel</Typography>
-                        <Typography variant="subtitle1">
-                            A Matching platform for building partners
-                        </Typography>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ flexGrow: 1 }}>
+                        <Box sx={{ position: 'relative', width: { xs: 180, sm: 200 }, height: 70, minWidth: 140 }}>
+                            <Image
+                                src="/uoft-logo-white.svg"
+                                alt={t('Header.logoAlt')}
+                                fill
+                                style={{ objectFit: 'contain' }}
+                                priority
+                            />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4">{t('Header.brand')}</Typography>
+                            <Typography
+                                variant="subtitle1"
+                                sx={{ display: { xs: 'none', md: 'block' } }}
+                            >
+                                {t('Header.tagline')}
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <LanguageToggle />
+                        <ModeSwitch/>
                     </Box>
 
-                    <ModeSwitch/>
-
-                    {user.username === 'guest' ? (
+                    {user.isLoading ? null : user.username === 'guest' ? (
                         <Button sx={{ color: 'white' }} onClick={() => router.push('/login')}>
-                            Login
+                            {t('Header.actions.login')}
                         </Button>
                     ) : (
                         <>
@@ -64,10 +85,10 @@ export default function Header() {
                                 sx={{ color: 'white' }}
                                 onClick={() => router.push('/console/opportunity/search')}
                             >
-                                Dashboard
+                                {t('Header.actions.dashboard')}
                             </Button>
                             <Button sx={{ color: 'white' }} onClick={handleLogOut}>
-                                Log out
+                                {t('Header.actions.logout')}
                             </Button>
                         </>
                     )}
@@ -84,7 +105,7 @@ export default function Header() {
                     {navTabs.map((tab, i) => (
                         <Tab
                             key={tab.href}
-                            label={tab.label}
+                            label={t(tab.labelKey)}
                             onClick={() => router.push(tab.href)}
                             value={i}
                         />

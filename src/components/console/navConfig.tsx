@@ -54,11 +54,11 @@ export type NavConfig = NavSection[];
 export const navConfig: NavConfig = [
     {
         type: 'title',
-        label: 'Search Listings',
+        label: 'Console.Nav.SearchListings.title',
         icon: Magnify,
         children: [
             {
-                label: 'Search Opportunity',
+                label: 'Console.Nav.SearchListings.searchOpportunity',
                 href: '/console/opportunity/search',
                 icon: TableSearch
             },
@@ -68,7 +68,7 @@ export const navConfig: NavConfig = [
             //     icon: TextBoxSearchOutline
             // },
             {
-                label: 'Saved Searches',
+                label: 'Console.Nav.SearchListings.savedSearches',
                 href: '/console/opportunity/search/saved',
                 icon: BookmarkOutline
             }
@@ -76,26 +76,26 @@ export const navConfig: NavConfig = [
     },
     {
         type: 'title',
-        label: 'My Opportunities',
+        label: 'Console.Nav.MyOpportunities.title',
         icon: BriefcaseOutline,
         children: [
             {
-                label: 'Post Opportunity',
+                label: 'Console.Nav.MyOpportunities.postOpportunity',
                 href: '/console/opportunity/new',
                 icon: AddOutlined
             },
             {
-                label: 'View My Opportunities',
+                label: 'Console.Nav.MyOpportunities.viewMyOpportunities',
                 href: '/console/opportunity/me',
                 icon: ClipboardTextOutline
             },
             {
-                label: 'Call for Proposals',
+                label: 'Console.Nav.MyOpportunities.callForProposals',
                 href: '/console/call-for-proposals',
                 icon: ClipboardTextOutline
             },
             {
-                label: 'View Favourites',
+                label: 'Console.Nav.MyOpportunities.viewFavourites',
                 href: '/console/opportunity/favourites',
                 icon: BookmarkIcon
             }
@@ -103,16 +103,16 @@ export const navConfig: NavConfig = [
     },
     {
         type: 'title',
-        label: 'My Applications',
+        label: 'Console.Nav.MyApplications.title',
         icon: TextBoxMultipleOutline,
         children: [
             {
-                label: 'My Applications',
+                label: 'Console.Nav.MyApplications.myApplications',
                 href: '/console/applications',
                 icon: ClipboardTextOutline
             },
             {
-                label: 'Start Application',
+                label: 'Console.Nav.MyApplications.startApplication',
                 href: '/console/applications/new',
                 icon: AddOutlined
             }
@@ -137,11 +137,11 @@ export const navConfig: NavConfig = [
     // },
     {
         type: 'title',
-        label: 'My Messages',
+        label: 'Console.Nav.MyMessages.title',
         icon: EmailOutline,
         children: [
             {
-                label: 'Chat',
+                label: 'Console.Nav.MyMessages.chat',
                 href: '/console/chat',
                 icon: EmailOutline,
             },
@@ -159,21 +159,21 @@ export const navConfig: NavConfig = [
     },
     {
         type: 'title',
-        label: 'Account',
+        label: 'Console.Nav.Account.title',
         icon: AccountCogOutline,
         children: [
             {
-                label: 'My Profile',
+                label: 'Console.Nav.Account.myProfile',
                 href: '/console/profile/account',
                 icon: AccountCircleOutline
             },
             {
-                label: 'My Organization',
+                label: 'Console.Nav.Account.myOrganization',
                 href: '/console/profile/organization',
                 icon: OfficeBuildingOutline
             },
             {
-                label: 'Change Password',
+                label: 'Console.Nav.Account.changePassword',
                 href: '/console/profile/password',
                 icon: LockReset
             }
@@ -181,23 +181,23 @@ export const navConfig: NavConfig = [
     },
     {
         type: 'title',
-        label: 'User Management',
+        label: 'Console.Nav.UserManagement.title',
         icon: AccountPlusOutline,
         children: [
             {
-                label: 'Invite Users',
+                label: 'Console.Nav.UserManagement.inviteUsers',
                 href: '/console/admin/invite',
                 icon: AccountPlusOutline,
                 requiredRoles: ['admin', 'org_admin']
             },
             {
-                label: 'Manage Users',
+                label: 'Console.Nav.UserManagement.manageUsers',
                 href: '/console/admin/users',
                 icon: AccountCogOutline,
                 requiredRoles: ['admin', 'org_admin']
             },
             {
-                label: 'Organizations',
+                label: 'Console.Nav.UserManagement.organizations',
                 href: '/console/admin/organizations',
                 icon: OfficeBuildingOutline,
                 requiredRoles: ['admin', 'org_admin']
@@ -206,17 +206,17 @@ export const navConfig: NavConfig = [
     },
     {
         type: 'title',
-        label: 'System Information',
+        label: 'Console.Nav.SystemInformation.title',
         hide: true,
         icon: CogOutline,
         children: [
             {
-                label: 'Admin Dashboard',
+                label: 'Console.Nav.SystemInformation.adminDashboard',
                 icon: ViewDashboardOutline,
                 href: '/console/admin/status'
             },
             {
-                label: 'Server Status',
+                label: 'Console.Nav.SystemInformation.serverStatus',
                 href: '/console/admin/status',
                 icon: ServerNetworkOutline
             }

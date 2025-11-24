@@ -1,0 +1,147 @@
+{
+  "Header": {
+    "brand": "Parcel",
+    "tagline": "Mettre en relation des partenaires pour bâtir des solutions de logement équitables, durables et abordables partout au Canada.",
+    "nav": {
+      "home": "Accueil",
+      "about": "À propos",
+      "mission": "Notre mission",
+      "resources": "Ressources",
+      "caseStudies": "Études de cas",
+      "sectors": "Secteurs",
+      "toolkits": "Boîtes à outils"
+    },
+    "actions": {
+      "login": "Ouvrir une session",
+      "logout": "Fermer la session",
+      "dashboard": "Tableau de bord"
+    },
+    "language": {
+      "ariaLabel": "Sélectionner la langue",
+      "options": {
+        "en": "Anglais (English)",
+        "fr": "Français"
+      }
+    },
+    "logoAlt": "Logo de l'Université de Toronto"
+  },
+  "Footer": {
+    "fundingAlt": "Financé en partie par le gouvernement du Canada"
+  },
+  "Home": {
+    "title": "Plateforme de partenariat pour le logement",
+    "taglineSummary": "La Plateforme de partenariat pour le logement est une plateforme alimentée par l'IA qui met en relation des partenaires, partage des connaissances et stimule des projets de logement et à usage mixte innovants, pour aider à fournir des solutions de logement équitables, durables et abordables partout au Canada.",
+    "shortDescription": "La Plateforme de partenariat pour le logement est une plateforme Web conçue pour libérer le potentiel de collaboration entre les secteurs public, privé et sans but lucratif et favoriser les partenariats entre les promoteurs, les organismes sans but lucratif, les municipalités, les prêteurs et d'autres intervenants du logement. Propulsée par des outils de jumelage et de partage de connaissances basés sur l'IA, la plateforme permet aux parties prenantes de co-créer des développements résilients, équitables et durables qui répondent à la crise complexe du logement abordable au Canada.",
+    "aboutSubtitle1": "Qui sommes-nous",
+    "elevatorPitch": "La Plateforme de partenariat pour le logement, développée au Centre d'ingénierie des services sociaux (Université de Toronto), est une plateforme Web conçue pour connecter les promoteurs, les municipalités, les organismes sans but lucratif, les prêteurs et les agences gouvernementales afin de co-créer des projets à usage mixte innovants. En combinant un jumelage intelligent, des outils de partage de connaissances et un accès au soutien financier, la plateforme vise à favoriser divers partenariats qui priorisent le logement abordable, les initiatives dirigées par des Autochtones et la durabilité. Au-delà de la connexion des parties prenantes, elle les équipe de formations, de mentorat et de meilleures pratiques pour garantir que les projets sont équitables, résilients et financièrement viables, débloquant des solutions collaboratives à la crise du logement au Canada.",
+    "aboutSubtitle2": "Notre vision",
+    "featuresTitle": "Les principales caractéristiques comprennent :",
+    "features": {
+      "matchmaking": "Jumelage intelligent : recherche de partenaires assistée par l'IA et outils d'auto-évaluation pour optimiser la préparation à la collaboration.",
+      "knowledge": "Carrefour du savoir : modules de formation, répertoire de meilleures pratiques et mentorat par les pairs pour renforcer la capacité de l'industrie.",
+      "funding": "Soutien au financement : outils pour les agences gouvernementales pour filtrer, classer et recommander des opportunités de financement, tout en attirant des bailleurs de fonds non traditionnels.",
+      "equity": "Priorité à l'équité : priorisation des initiatives de logement autochtone et soutien aux groupes marginalisés grâce à des solutions de logement sûres et abordables."
+    }
+  },
+  "About": {
+    "title": "À propos de la Plateforme de partenariat pour le logement",
+    "body": "La Plateforme de partenariat pour le logement est un carrefour Web créé par le Centre d'ingénierie des services sociaux de l'Université de Toronto. Conçue pour aider à relever les défis complexes du logement au Canada, elle met à disposition des ressources de partage de connaissances et utilise un jumelage alimenté par l'IA pour aider à connecter les promoteurs, les organismes sans but lucratif, les municipalités, les prêteurs et les agences gouvernementales. En favorisant divers partenariats, y compris des initiatives dirigées par des Autochtones, la plateforme permet aux parties prenantes de co-créer des projets à usage mixte innovants qui offrent des logements durables, équitables et abordables.",
+    "missionHeading": "Notre mission"
+  },
+  "Mission": {
+    "title": "Notre mission",
+    "statement": "Aider à bâtir des solutions de logement équitables, durables et résilientes grâce à la collaboration, l'innovation et le partage des connaissances."
+  },
+  "Console": {
+    "Nav": {
+      "SearchListings": {
+        "title": "Rechercher des annonces",
+        "searchOpportunity": "Rechercher une opportunité",
+        "savedSearches": "Recherches sauvegardées"
+      },
+      "MyOpportunities": {
+        "title": "Mes opportunités",
+        "postOpportunity": "Publier une opportunité",
+        "viewMyOpportunities": "Voir mes opportunités",
+        "callForProposals": "Appel à propositions",
+        "viewFavourites": "Voir les favoris"
+      },
+      "MyApplications": {
+        "title": "Mes candidatures",
+        "myApplications": "Mes candidatures",
+        "startApplication": "Commencer une candidature"
+      },
+      "MyInterests": {
+        "title": "Mes intérêts",
+        "postInterest": "Publier un intérêt",
+        "viewMyInterests": "Voir mes intérêts"
+      },
+      "MyMessages": {
+        "title": "Mes messages",
+        "chat": "Clavardage",
+        "inbox": "Boîte de réception",
+        "sent": "Envoyés",
+        "archived": "Archivés"
+      },
+      "Account": {
+        "title": "Compte",
+        "myProfile": "Mon profil",
+        "myOrganization": "Mon organisation",
+        "changePassword": "Changer le mot de passe",
+        "inviteUser": "Inviter un utilisateur"
+      },
+      "UserManagement": {
+        "title": "Gestion des utilisateurs",
+        "inviteUsers": "Inviter des utilisateurs",
+        "manageUsers": "Gérer les utilisateurs",
+        "organizations": "Organisations"
+      },
+      "Admin": {
+        "title": "Admin",
+        "dashboard": "Tableau de bord",
+        "systemStatus": "État du système"
+      },
+      "SystemInformation": {
+        "title": "Informations système",
+        "adminDashboard": "Tableau de bord admin",
+        "serverStatus": "État du serveur"
+      }
+    },
+      "Dashboard": {
+      "title": "Tableau de bord | Parcel",
+      "welcome": "Bienvenue sur le tableau de bord"
+    },
+    "Search": {
+      "limitToMap": "Limiter à la carte",
+      "refresh": "Actualiser",
+      "clear": "Effacer",
+      "filters": "Filtres",
+      "more": "+{count} de plus",
+      "Filters": {
+        "title": "Filtres",
+        "searchLabel": "Recherche",
+        "searchPlaceholder": "Nom, description…",
+        "projectType": "Type de projet",
+        "projectStage": "Étape du projet",
+        "roles": "Rôles",
+        "posted": "Publié",
+        "searchable": "Recherchable",
+        "sortBy": "Trier par",
+        "sortDir": "Direction du tri",
+        "pageSize": "Taille de la page",
+        "apply": "Appliquer",
+        "cancel": "Annuler",
+        "clear": "Effacer",
+        "any": "Tout",
+        "yes": "Oui",
+        "no": "Non",
+        "lastUpdated": "Dernière mise à jour",
+        "datePosted": "Date de publication",
+        "name": "Nom",
+        "direction": "Direction",
+        "descending": "Descendant",
+        "ascending": "Ascendant"
+      }
+    }
+  }
+}

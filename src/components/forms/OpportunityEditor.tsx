@@ -14,7 +14,7 @@ import {
     useUpdateOpportunity
 } from '@/lib/hooks/useOpportunities';
 import { dtoToForm } from '@/lib/opportunities/mapper';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import OpportunityFormSkeleton from "@/components/forms/skeleton/OpportunityFormSkeleton";
 
 type Props = Partial<{ mode: 'create' | 'edit'; iri: string }>;

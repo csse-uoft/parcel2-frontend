@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import Header from '@/components/header/Header';
 import { useCompletePasswordReset } from '@/lib/hooks/useAuth';
 import { FetcherError } from '@/lib/errors';

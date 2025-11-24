@@ -26,7 +26,7 @@ import { fetcher } from '@/lib/fetcher';
 import { useCreateChat } from '@/lib/hooks/useChat';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { useSnackbar } from 'notistack';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { FetcherError } from '@/lib/errors';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import BookmarkIcon from '@mui/icons-material/Bookmark';

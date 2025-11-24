@@ -11,7 +11,7 @@ import React, {
 import { useSnackbar } from 'notistack';
 import { useUser } from "@/lib/hooks/useUser";
 import { useLogout } from "@/lib/hooks/useAuth";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 /* ---------- Types ----------------------------------------------------- */
 

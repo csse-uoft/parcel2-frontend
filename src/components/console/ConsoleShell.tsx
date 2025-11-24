@@ -22,13 +22,15 @@ import {
     ExpandMore,
 } from '@mui/icons-material';
 import { useColorScheme, useTheme, alpha } from '@mui/material/styles';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 import { navConfig, NavSection } from './navConfig';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { Loading } from '@/components/Loading';
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
+import LanguageToggle from '@/components/header/LanguageToggle';
 
 const DRAWER_WIDTH = 240;
 
@@ -40,6 +42,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const router = useRouter();
     const pathname = usePathname();
     const theme = useTheme();
+    const t = useTranslations();
     const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
     const { mode, systemMode } = useColorScheme();
     const isDark = mode === 'dark' || (mode === 'system' && systemMode === 'dark');
@@ -132,7 +135,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                             </ListItemIcon>
                         )}
                         <ListItemText
-                            primary={label}
+                            primary={t(label)}
                             primaryTypographyProps={{ noWrap: true }}
                         />
                         {parentOpen ? <ExpandLess/> : <ExpandMore/>}
@@ -187,7 +190,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                                         </ListItemIcon>
                                     )}
                                     <ListItemText
-                                        primary={cLabel}
+                                        primary={t(cLabel)}
                                         primaryTypographyProps={{ noWrap: true }}
                                     />
                                 </ListItemButton>
@@ -201,7 +204,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         });
 
         return <List>{items}</List>;
-    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent, isDark, visibleSections, open, theme]);
+    }, [expanded, isUpLg, pathname, router, setOpen, toggleParent, isDark, visibleSections, open, theme, t]);
 
     /* ---------- render --------------------------------------------- */
     return (
@@ -214,13 +217,14 @@ const ConsoleShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         {open ? <MenuOpenIcon/> : <MenuIcon/>}
                     </IconButton>
                     <Box sx={{ flexGrow: 1 }}/>
+                    <LanguageToggle />
                     <ThemeModeSwitch/>
                     <Button color="inherit" onClick={() => router.push('/')}>
-                        Home Page
+                        {t('Header.nav.home')}
                     </Button>
                     {/* use logout from UserContext */}
                     <Button color="inherit" onClick={logout}>
-                        Log out
+                        {t('Header.actions.logout')}
                     </Button>
                 </Toolbar>
             </AppBar>
