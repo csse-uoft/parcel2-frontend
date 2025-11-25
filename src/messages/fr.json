@@ -37,10 +37,68 @@
     "aboutSubtitle2": "Notre vision",
     "featuresTitle": "Les principales caractéristiques comprennent :",
     "features": {
-      "matchmaking": "Jumelage intelligent : recherche de partenaires assistée par l'IA et outils d'auto-évaluation pour optimiser la préparation à la collaboration.",
-      "knowledge": "Carrefour du savoir : modules de formation, répertoire de meilleures pratiques et mentorat par les pairs pour renforcer la capacité de l'industrie.",
-      "funding": "Soutien au financement : outils pour les agences gouvernementales pour filtrer, classer et recommander des opportunités de financement, tout en attirant des bailleurs de fonds non traditionnels.",
-      "equity": "Priorité à l'équité : priorisation des initiatives de logement autochtone et soutien aux groupes marginalisés grâce à des solutions de logement sûres et abordables."
+      "matchmaking": {
+        "title": "Jumelage intelligent",
+        "text": "Recherche de partenaires assistée par l'IA et outils d'auto-évaluation pour optimiser la préparation à la collaboration."
+      },
+      "knowledge": {
+        "title": "Carrefour du savoir",
+        "text": "Modules de formation, répertoire de meilleures pratiques et mentorat par les pairs pour renforcer la capacité de l'industrie."
+      },
+      "funding": {
+        "title": "Soutien au financement",
+        "text": "Outils pour les agences gouvernementales pour filtrer, classer et recommander des opportunités de financement, tout en attirant des bailleurs de fonds non traditionnels."
+      },
+      "equity": {
+        "title": "Priorité à l'équité",
+        "text": "Priorisation des initiatives de logement autochtone et soutien aux groupes marginalisés grâce à des solutions de logement sûres et abordables."
+      }
+    },
+    "hero": {
+      "chips": {
+        "collaboration": "Collaboration pancanadienne",
+        "ai": "Partenariats activés par l'IA",
+        "sustainable": "Abordable + durable"
+      },
+      "cta": {
+        "explore": "Explorer la plateforme",
+        "mission": "Notre mission"
+      },
+      "whatYouCanDo": "Ce que vous pouvez faire ici"
+    },
+    "howItWorks": {
+      "overline": "Du premier contact à l'inauguration",
+      "title": "Comment la plateforme aide",
+      "steps": {
+        "connect": {
+          "title": "Connecter",
+          "body": "Trouver et engager des partenaires des secteurs public, privé et sans but lucratif."
+        },
+        "coDesign": {
+          "title": "Co-concevoir",
+          "body": "Utiliser les connaissances partagées, la formation et le mentorat pour façonner des projets résilients."
+        },
+        "deliver": {
+          "title": "Livrer",
+          "body": "Aligner le financement et la préparation pour donner vie à des logements équitables et durables."
+        }
+      }
+    },
+    "featuresSection": {
+      "title": "Conçu pour une collaboration concrète"
+    },
+    "missionSection": {
+      "cta": {
+        "start": "Démarrer un partenariat",
+        "learnMore": "En savoir plus"
+      },
+      "poweredBy": "Propulsé par le Centre d'ingénierie des services sociaux, Université de Toronto."
+    },
+    "finalCta": {
+      "title": "Prêt à bâtir ensemble ?",
+      "body": "Réunissez les bonnes personnes, les connaissances et le financement à la même table, puis passez plus rapidement de l'idée à l'impact.",
+      "join": "Rejoindre la plateforme",
+      "talk": "Parler à l'équipe"
     }
   },
   "About": {

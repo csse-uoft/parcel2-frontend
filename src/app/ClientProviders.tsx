@@ -4,6 +4,7 @@ import * as React from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import Box from '@mui/material/Box';
 import theme from '@/theme';
 import { SnackbarProvider } from 'notistack';
@@ -25,6 +26,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         <SnackbarProvider maxSnack={3} autoHideDuration={3000}>
           <UserProvider>
             <CssBaseline />
+            <GlobalStyles styles={{ html: { scrollBehavior: 'smooth' } }} />
             <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
               <Box component="main" sx={{ flexGrow: 1 }}>
                 {children}

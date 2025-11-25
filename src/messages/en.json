@@ -37,10 +37,68 @@
     "aboutSubtitle2": "Our Vision",
     "featuresTitle": "Key features include:",
     "features": {
-      "matchmaking": "Smart matchmaking: AI-assisted partner search and self-assessment tools to optimize collaboration readiness.",
-      "knowledge": "Knowledge hub: Training modules, best-practices repository, and peer-to-peer mentorship to strengthen industry capacity.",
-      "funding": "Funding support: Tools for governmental agencies to filter, rank, and recommend financing opportunities, while attracting non-traditional funders.",
-      "equity": "Equity focus: Prioritization of Indigenous housing initiatives and support for marginalized groups through secure, affordable housing solutions."
+      "matchmaking": {
+        "title": "Smart matchmaking",
+        "text": "AI-assisted partner search and self-assessment tools to optimize collaboration readiness."
+      },
+      "knowledge": {
+        "title": "Knowledge hub",
+        "text": "Training modules, best-practices repository, and peer-to-peer mentorship to strengthen industry capacity."
+      },
+      "funding": {
+        "title": "Funding support",
+        "text": "Tools for governmental agencies to filter, rank, and recommend financing opportunities, while attracting non-traditional funders."
+      },
+      "equity": {
+        "title": "Equity focus",
+        "text": "Prioritization of Indigenous housing initiatives and support for marginalized groups through secure, affordable housing solutions."
+      }
+    },
+    "hero": {
+      "chips": {
+        "collaboration": "Canada-wide collaboration",
+        "ai": "AI-enabled partnerships",
+        "sustainable": "Affordable + sustainable"
+      },
+      "cta": {
+        "explore": "Explore the platform",
+        "mission": "Our mission"
+      },
+      "whatYouCanDo": "What you can do here"
+    },
+    "howItWorks": {
+      "overline": "From first contact to ribbon-cutting",
+      "title": "How the platform helps",
+      "steps": {
+        "connect": {
+          "title": "Connect",
+          "body": "Find and engage partners across public, private, and non-profit sectors."
+        },
+        "coDesign": {
+          "title": "Co-design",
+          "body": "Use shared knowledge, training, and mentorship to shape resilient projects."
+        },
+        "deliver": {
+          "title": "Deliver",
+          "body": "Align financing and readiness to bring equitable, sustainable housing to life."
+        }
+      }
+    },
+    "featuresSection": {
+      "title": "Built for real-world collaboration"
+    },
+    "missionSection": {
+      "cta": {
+        "start": "Start a partnership",
+        "learnMore": "Learn more"
+      },
+      "poweredBy": "Powered by the Centre for Social Services Engineering, University of Toronto."
+    },
+    "finalCta": {
+      "title": "Ready to build together?",
+      "body": "Bring the right people, knowledge, and financing to the same table—then move faster from idea to impact.",
+      "join": "Join the platform",
+      "talk": "Talk to the team"
     }
   },
   "About": {

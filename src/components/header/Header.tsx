@@ -45,6 +45,19 @@ export default function Header() {
         await user.logout();
     };
 
+    const handleNav = (href: string) => {
+        if (href.startsWith('/#') && pathname === '/') {
+            const id = href.substring(2);
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                window.history.pushState({}, '', href);
+                return;
+            }
+        }
+        router.push(href);
+    };
+
     return (
         <header>
             <AppBar sx={{ p: 1.5, bgcolor: 'rgb(0, 23, 81)' }} position="static">
@@ -106,7 +119,7 @@ export default function Header() {
                         <Tab
                             key={tab.href}
                             label={t(tab.labelKey)}
-                            onClick={() => router.push(tab.href)}
+                            onClick={() => handleNav(tab.href)}
                             value={i}
                         />
                     ))}
