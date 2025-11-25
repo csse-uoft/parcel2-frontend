@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../login/components/CustomIcons';
+import { Link as RouterLink } from '@/i18n/navigation';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -181,17 +182,18 @@ export default function RegisterCard() {
                     label="Remember me"
                 />
                 <Button type="submit" fullWidth variant="contained" onClick={validateInputs}>
-                    Sign in
+                    Sign up
                 </Button>
                 <Typography sx={{ textAlign: 'center' }}>
-                    Don&apos;t have an account?{' '}
+                    Already have an account?{' '}
                     <span>
             <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                component={RouterLink}
+                href="/login"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
             >
-              Sign up
+              Sign in
             </Link>
           </span>
                 </Typography>

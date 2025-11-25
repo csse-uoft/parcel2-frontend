@@ -2,7 +2,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import NextLink from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Header from '@/components/header/Header';
 import { getTranslations } from 'next-intl/server';
 
@@ -30,7 +30,7 @@ export default async function MissionPage() {
             {t('statement')}
           </Typography>
           <Button
-            component={NextLink}
+            component={Link}
             href="/"
             variant="contained"
             sx={{ alignSelf: { xs: 'stretch', md: 'center' }, maxWidth: 300 }}

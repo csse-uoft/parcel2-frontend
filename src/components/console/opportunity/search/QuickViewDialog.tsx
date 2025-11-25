@@ -19,7 +19,7 @@ import {
     Divider,
     Tooltip,
 } from '@mui/material';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { OpportunityDetail } from './types';
 import { absUrl } from './utils';
 import { fetcher } from '@/lib/fetcher';

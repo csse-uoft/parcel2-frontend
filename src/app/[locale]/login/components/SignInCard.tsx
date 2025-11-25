@@ -14,7 +14,8 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
 import { useLogin } from "@/lib/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { Link as RouterLink } from '@/i18n/navigation';
 import { FetcherError } from "@/lib/errors";
 import { useLocale } from 'next-intl';
 
@@ -192,7 +193,8 @@ export default function SignInCard() {
                     Don&apos;t have an account?{' '}
                     <span>
             <Link
-                href="/register/"
+                component={RouterLink}
+                href="/register"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
             >
