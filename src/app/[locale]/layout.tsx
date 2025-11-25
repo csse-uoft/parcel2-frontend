@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 interface LocaleLayoutProps {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
 export async function generateStaticParams() {
