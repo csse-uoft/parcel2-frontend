@@ -20,7 +20,7 @@
     "@react-google-maps/api": "^2.20.7",
     "@vis.gl/react-google-maps": "^1.5.5",
     "mdi-material-ui": "^7.9.4",
-    "next": "15.3.5",
+    "next": "^15.5.7",
     "next-intl": "^4.5.5",
     "notistack": "^3.0.2",
     "react": "^19.0.0",
