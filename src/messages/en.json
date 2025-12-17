@@ -39,19 +39,19 @@
     "features": {
       "matchmaking": {
         "title": "Smart matchmaking",
-        "text": "AI-assisted partner search and self-assessment tools to optimize collaboration readiness."
+        "text": "AI-assisted partner search and recommendations."
       },
       "knowledge": {
         "title": "Knowledge hub",
-        "text": "Training modules, best-practices repository, and peer-to-peer mentorship to strengthen industry capacity."
+        "text": "Training modules, best-practices, funding opportunities."
       },
       "funding": {
         "title": "Funding support",
-        "text": "Tools for governmental agencies to filter, rank, and recommend financing opportunities, while attracting non-traditional funders."
+        "text": "Tools to filter, rank and recommend financing opportunities."
       },
       "equity": {
         "title": "Equity focus",
-        "text": "Prioritization of Indigenous housing initiatives and support for marginalized groups through secure, affordable housing solutions."
+        "text": "Support for Indigenous housing initiatives and marginalized groups through sustainable, affordable housing solutions."
       }
     },
     "hero": {
@@ -201,5 +201,10 @@
         "ascending": "Ascending"
       }
     }
+  },
+  "KnowledgeHub": {
+    "title": "PARCEL KNOWLEDGE HUB LINKS",
+    "description": "Curated resources to help you navigate affordable housing development, partnerships, and funding opportunities.",
+    "footer": "Links open in a new window. Resources are regularly updated."
   }
 }

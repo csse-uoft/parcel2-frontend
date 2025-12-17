@@ -39,19 +39,19 @@
     "features": {
       "matchmaking": {
         "title": "Jumelage intelligent",
-        "text": "Recherche de partenaires assistée par l'IA et outils d'auto-évaluation pour optimiser la préparation à la collaboration."
+        "text": "Recherche de partenaires et recommandations assistées par l'IA."
       },
       "knowledge": {
         "title": "Carrefour du savoir",
-        "text": "Modules de formation, répertoire de meilleures pratiques et mentorat par les pairs pour renforcer la capacité de l'industrie."
+        "text": "Modules de formation, meilleures pratiques, opportunités de financement."
       },
       "funding": {
         "title": "Soutien au financement",
-        "text": "Outils pour les agences gouvernementales pour filtrer, classer et recommander des opportunités de financement, tout en attirant des bailleurs de fonds non traditionnels."
+        "text": "Outils pour filtrer, classer et recommander des opportunités de financement."
       },
       "equity": {
         "title": "Priorité à l'équité",
-        "text": "Priorisation des initiatives de logement autochtone et soutien aux groupes marginalisés grâce à des solutions de logement sûres et abordables."
+        "text": "Soutien aux initiatives de logement autochtone et aux groupes marginalisés grâce à des solutions de logement durables et abordables."
       }
     },
     "hero": {
@@ -201,5 +201,10 @@
         "ascending": "Ascendant"
       }
     }
+  },
+  "KnowledgeHub": {
+    "title": "LIENS DU CENTRE DE CONNAISSANCES PARCEL",
+    "description": "Ressources organisées pour vous aider à naviguer dans le développement de logements abordables, les partenariats et les opportunités de financement.",
+    "footer": "Les liens s'ouvrent dans une nouvelle fenêtre. Les ressources sont régulièrement mises à jour."
   }
 }

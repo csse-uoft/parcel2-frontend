@@ -19,6 +19,7 @@ import Header from '@/components/header/Header';
 import { useUserContext } from '@/contexts/UserContext';
 import { Loading } from '@/components/Loading';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 
 // Icons
 import HandshakeIcon from '@mui/icons-material/Handshake';
@@ -80,6 +81,7 @@ function HeroBackground() {
 export default function Home() {
   const { isLoading } = useUserContext();
   const t = useTranslations();
+  const router = useRouter();
 
   const {mode, systemMode} = useColorScheme();
   const resolvedMode = (mode === 'system' ? systemMode : mode) ?? 'light';
@@ -92,11 +94,13 @@ export default function Home() {
       icon: <HandshakeIcon fontSize="large" color="primary" />,
       title: t('Home.features.matchmaking.title'),
       text: t('Home.features.matchmaking.text'),
+      link: '/register',
     },
     {
       icon: <SchoolIcon fontSize="large" color="primary" />,
       title: t('Home.features.knowledge.title'),
       text: t('Home.features.knowledge.text'),
+      link: '/knowledge-hub',
     },
     {
       icon: <PaidIcon fontSize="large" color="primary" />,
@@ -213,10 +217,11 @@ export default function Home() {
                   {features.map((feature, index) => (
                     <Stack
                       key={index}
+                      onClick={feature.link ? () => router.push(feature.link) : undefined}
                       direction="row"
                       spacing={2}
                       alignItems="flex-start"
-                      sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#fff', isDarkMode ? 0.04 :0.14), color: 'common.white' }}
+                      sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#fff', isDarkMode ? 0.04 :0.14), color: 'common.white', cursor: feature.link ? 'pointer' : 'default' }}
                     >
                       <Box sx={{ mt: 0.25 }}>{feature.icon}</Box>
                       <Box>
@@ -352,12 +357,14 @@ export default function Home() {
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Paper
                   elevation={1}
+                  onClick={feature.link ? () => router.push(feature.link) : undefined}
                   sx={{
                     p: 3,
                     height: '100%',
                     borderRadius: 4,
                     textAlign: 'left',
                     transition: 'transform 160ms ease, box-shadow 160ms ease',
+                    cursor: feature.link ? 'pointer' : 'default',
                     '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
                   }}
                 >
